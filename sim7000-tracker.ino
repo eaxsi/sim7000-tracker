@@ -1,7 +1,7 @@
 // SIM7000-tracker
 // Eero Silfverberg 2020
 
-#define VERSION "1.4.2"
+#define VERSION "1.5.0"
 
 #define DEBUG 1
 
@@ -39,6 +39,8 @@
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
 #include <rom/rtc.h>
+#include <rom/gpio.h>
+#include "driver/rtc_io.h"
 
 // for FOTA update
 #include <WiFi.h>
@@ -67,6 +69,7 @@ unsigned long sysinfo_interval = 30;
 unsigned long dynamic_interval = 0;
 char nodeId[7] = "";
 int mode = 1;
+RTC_DATA_ATTR int bootCount = 0; // stored in RTC memory
 int old_mode = 1;
 
 unsigned int mqttConnectionCount = 0;
@@ -157,6 +160,7 @@ boolean mqttConnect()
         updateValue("version", VERSION);
         updateValue("rebootReason", rtc_get_reset_reason(0));
         send_network_category();
+        sendValue("fix", 0);
     }
     return mqtt.connected();
 }
@@ -359,7 +363,10 @@ void updateValue(char* topic_name, char* value_buffer)
 
 void setup()
 {
+    bootCount++;
     setCpuFrequencyMhz(80);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);
+    rtc_gpio_hold_dis(GPIO_NUM_0);
     SerialMon.begin(115200);
     Serial.print("Version");
     Serial.println(VERSION);
@@ -370,37 +377,54 @@ void setup()
     pinMode(PIN_DTR, OUTPUT);
     pinMode(V_BATT_PIN, INPUT);
 
-    digitalWrite(LED_PIN, HIGH); // turn internal led off
+    digitalWrite(LED_PIN, LOW); //Led on on the startup
     digitalWrite(PIN_DTR, LOW);
 
     // power SIM7000
     pinMode(PWR_PIN, OUTPUT);
+    SerialAT.begin(UART_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
+    SerialAT.flush();
     digitalWrite(PWR_PIN, HIGH);
     delay(300);
     digitalWrite(PWR_PIN, LOW);
     SerialMon.println("Wait...");
-
-    // start modem serial
-    SerialAT.begin(UART_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
-    SerialAT.flush();
-
     delay(6000);
-    SerialMon.println("Initializing modem...");
-    modem.restart();
-    delay(1000);
+    
+    if(bootCount > 1) // Wake up from deepsleep
+    {
+        SerialMon.println("Wake up from sleep");
+        digitalWrite(PWR_PIN, LOW);
+        modem.sleepEnable(false);
+    }
+    else
+    {
+        modem.sleepEnable(false);
+        SerialMon.println("Initializing modem...");
+        modem.restart();
+        delay(1000);
+    }
+    
 
+    digitalWrite(LED_PIN, HIGH); // turn internal led off
+    
     String modemInfo = modem.getModemInfo();
     SerialMon.print("Modem Info: ");
     SerialMon.println(modemInfo);
 
-    enableGPS();
+    if(bootCount == 1) // first time booting
+    {
+        enableGPS(); // enable GPS here to get it working as fast as possible
+        
+        // force modem to auto network mode
+        modem.setNetworkMode(38); //  2 = auto, 13=GSM, 38=LTE, 51=LTE+GSM
+        modem.setPreferredMode(1); // 1=CAT-M, 2=NB-IoT, 3=CAT-M and NB-IoT
+    }
+    else
+    {
+        delay(1);
+    }
 
-    modem.sleepEnable(true);
-    //digitalWrite(PIN_DTR, HIGH);
 
-    // force modem to auto network mode
-    modem.setNetworkMode(38); //  2 = auto, 13=GSM, 38=LTE, 51=LTE+GSM
-    modem.setPreferredMode(1); // 1=CAT-M, 2=NB-IoT, 3=CAT-M and NB-IoT
 
     // get nodeID
     String imei = modem.getIMEI();
@@ -574,6 +598,37 @@ void loop()
             if (old_mode != 3)
                 disableGPS();
             break;
+        
+        case 4: // sleep
+            disableGPS();
+            updateValue("sleep", 1);
+            mqtt.disconnect();
+            modem.gprsDisconnect();
+            modem.sleepEnable(true);
+            digitalWrite(PIN_DTR, HIGH);
+            
+            pinMode(25, OUTPUT);
+            digitalWrite(25, HIGH);
+            rtc_gpio_hold_en(GPIO_NUM_0);
+
+            esp_sleep_enable_timer_wakeup(30 * 60 * uS_TO_S_FACTOR);
+            esp_deep_sleep_start();
+            break;
+        
+        case 5: // check only status, no power to gnss
+            delay(100);
+            break;
+
+        case 6: // Power off modem and go to deep sleep
+            disableGPS();
+            mqtt.disconnect();
+            modem.gprsDisconnect();
+            // AT+CPOWD=1
+            modem.sendAT(GF("+CPOWD=1"));
+            pinMode(25, OUTPUT);
+            digitalWrite(25, HIGH);
+            esp_deep_sleep_start();
+            break;
 
         /*
     case 4: // power saving mode
@@ -651,7 +706,7 @@ void loop()
     // check mobile network
     if (!modem.isNetworkConnected()) {
         SerialMon.println("No cellular connection");
-        if (modem.waitForNetwork(600000L))
+        if (modem.waitForNetwork(5000L))
             SerialMon.println("Connected back to cellular network");
     }
 
