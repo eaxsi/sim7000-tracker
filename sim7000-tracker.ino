@@ -160,7 +160,7 @@ boolean mqttConnect()
         updateValue("version", VERSION);
         updateValue("rebootReason", rtc_get_reset_reason(0));
         send_network_category();
-        sendValue("fix", 0);
+        updateValue("fix", 0);
     }
     return mqtt.connected();
 }
