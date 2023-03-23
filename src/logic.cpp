@@ -5,11 +5,6 @@
 void Logic::update()
 {
     // if timer has expired
-    
-
-
-
-
 
     //run sublasses updates
 
