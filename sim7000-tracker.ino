@@ -1,80 +1,83 @@
-// SIM7000-tracker
-// Eero Silfverberg 2021
-
 #include "src/hardware_configuration.h"
-#include "src/sysclock.h"
-#include "src/ui.h"
 
 
-//#include "arduino_secrets.h"
+enum class system_state{
+    idle = 0, // stay connected, gps off, wait for commands, idle for 5 min, then go to 
+    // connect to MQTT
+    hibernate = 1, // herätys vain magneetilla
+    sleep = 2, // herätys magneetti + liikesensori
+    track = 3, // main mode, go to sleep if no movement, if movement send position
+    track_force = 4 
+    };
 
-SysClock sysclock;
-Ui ui(sysclock);
-//communications: tinygsm, gps, mqtt
-//logic: when to send location, when to power saving mode
-//system: battery soc, power saving
+/*
+Start
+Is this cold start? --> Fetch settings from internet
+Warm start --> continue last mode 
 
+Modes: 
+- Deep sleep: wake up when plugging charger or magnet
+// - Light sleep: wake up when magnet triggers or motion sensor triggers
+- FW update: Fetch update from web
+- Forced: update position as fast as possible
+- Normal: switch between light sleep and sending position when tracker moves
+
+
+Normal mode:
+- send position, wait for X, if no movement set gps to sleep, if no movement for x+y time, set modem and esp to sleep
+- when movement, wake up and wait for gps fix and internet connection
+- send position
+- wait if more movement happens, if not go back to sleep
+
+
+*/
+
+// store system state in RTC memory so that it will be remembered through out sleep
+RTC_DATA_ATTR system_state state;
 
 void setup()
 {
     Serial.begin(115200);
-    //init sim7000
-    //try to connect to 
-}
 
+}
 
 void loop()
 {
-    ui.testmode();
+    switch (state)
+    {
+    case system_state::idle:
+        if(5 min passed)
+        {
+            state = system_state::sleep;
+        }
+        // wait for instructions or OTA update
+        break;
+    case system_state::hibernate:
+    {
 
-    /*
-    Things to react:
-    - Movement
-    - Reed/magnet
-    - Time
-    - Mqtt message
-    - battery staus
-    - charger status
-    - communication status
-    - battery voltage
+    }
+    case system_state::track_force:
+    {
+        // make sure that we are connented to MQTT and internet
+        // make sure that we have GNSS fix
+        // 
+        if(connected_to_mqtt)
+        else
+        {
+            communication.try_to_connect_to_mqtt_broker();
 
+        }
 
-    Possible actions:
-    - device moves
-    - magnet is sensed
-    - timer expires
-    - external command
-    - change of mode
-    - change of settings
-    - go to hibernation/power save mode
+        break;
+    }
+    default:
+        break;
+    }
 
-
-    Hibernation:
-    - come online once in 6h / when reed sensor activates
-    - stay 30s online
-    - go back to sleep
-
-    Power save mode:
-    - wait until GPS fix
-    - send location every 20s if device is moving
-    - if no movement for 1 min disable gps
-    - if no movement for 10 min, disconnect mqtt and active data connection
-    - if movement detected, gps hotstart
+    // Requests
 
 
+    // Updates
+    communications.update(); // Update communications state machine and keep the device in desired state
 
-
-    Modem modes: off, on, registered to net, active data connection
-    GNSS modes: off, searching for fix, fix
-
-
-    Main logic:
-    - see if momement:
-    
-    logic.update()
-    ui.update()
-    communication.update()
-    system.update()
-    settings.update()
-    */
 }
