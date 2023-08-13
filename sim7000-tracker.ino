@@ -160,7 +160,7 @@ boolean mqttConnect()
         updateValue("version", VERSION);
         updateValue("rebootReason", rtc_get_reset_reason(0));
         send_network_category();
-        sendValue("fix", 0);
+        updateValue("fix", 0);
     }
     return mqtt.connected();
 }
@@ -500,7 +500,7 @@ void update_location()
             char pos_buf[50];
             String pos_string = String(lat, 6) + "," + String(lon, 6);
             pos_string.toCharArray(pos_buf, 50);
-            updateValue("position", pos_buf);
+            //updateValue("position", pos_buf);
         }
 
         if (current_gnss_data.speed != old_gnss_data.speed)
@@ -509,6 +509,19 @@ void update_location()
         if (current_gnss_data.accuracy != old_gnss_data.accuracy)
             updateValue("accuracy", current_gnss_data.accuracy);
     }
+
+    // sysinfo here
+    float voltage = get_avg_voltage();
+    int raw_soc = map(get_avg_voltage(), 2770, 3500, 0, 100);
+    current_sysinfo_data.soc = (unsigned int)constrain(raw_soc, 0, 100);
+    current_sysinfo_data.charging = raw_soc < 0 ? 1 : 0;
+    current_sysinfo_data.signal = (unsigned int)(modem.getSignalQuality() * 827 + 127) >> 8;
+
+    // Send all data in one message
+    char buffer[50];
+    String msg = String(current_gnss_data.fix) + "," + String(lat, 6) + "," + String(lon, 6) + "," + String(current_gnss_data.speed) + ","+String(current_gnss_data.accuracy) + ","+String(current_sysinfo_data.signal) + "," + String(current_sysinfo_data.soc);
+    msg.toCharArray(buffer, 50);
+    updateValue("update_v1", buffer);
 
     // restart gnss if no fix for a long time
     if (!current_gnss_data.fix && current_gnss_data.last_fix + 300000 < millis()) {
