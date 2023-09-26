@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "led.h"
 #include "sysclock.h"
 
@@ -30,3 +30,4 @@ class Leds
         uint16_t m_blink_interval = 1000;
         uint32_t m_blink_timestamp;
 };
+*/

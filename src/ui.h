@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include <stdint.h>
 
 #include "sysclock.h"
@@ -24,3 +25,4 @@ class Ui
         uint16_t m_capture_blink_speed = 500; //ms
         uint16_t m_confirmation_blink_speed = 100; //ms
 };
+*/

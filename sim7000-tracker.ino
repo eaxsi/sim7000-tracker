@@ -1,83 +1,193 @@
-#include "src/hardware_configuration.h"
-
-
-enum class system_state{
-    idle = 0, // stay connected, gps off, wait for commands, idle for 5 min, then go to 
-    // connect to MQTT
-    hibernate = 1, // herätys vain magneetilla
-    sleep = 2, // herätys magneetti + liikesensori
-    track = 3, // main mode, go to sleep if no movement, if movement send position
-    track_force = 4 
-    };
-
 /*
-Start
-Is this cold start? --> Fetch settings from internet
-Warm start --> continue last mode 
-
-Modes: 
-- Deep sleep: wake up when plugging charger or magnet
-// - Light sleep: wake up when magnet triggers or motion sensor triggers
-- FW update: Fetch update from web
-- Forced: update position as fast as possible
-- Normal: switch between light sleep and sending position when tracker moves
-
-
-Normal mode:
-- send position, wait for X, if no movement set gps to sleep, if no movement for x+y time, set modem and esp to sleep
-- when movement, wake up and wait for gps fix and internet connection
-- send position
-- wait if more movement happens, if not go back to sleep
-
-
+        SIM7000-tracker
+    Based on LilyGO-T-SIM7000G board
 */
 
+#include "src/hardware_configuration.h"
+
+#include <TinyGsmClient.h>
+#include "Arduino.h"
+
+#include "src/common.h"
+#include "src/communication.h"
+#include "src/gnss.h"
+#include "src/hardware_configuration.h"
+#include "src/log.h"
+#include "src/platform.h"
+#include "src/settings.h"
+#include "src/util.h"
+
+TinyGsm modem = TinyGsm(MODEM_SERIAL);
+TinyGsmClient client = TinyGsmClient(modem);
+
+void callback_helper(char* topic, byte* payload, unsigned int len);
+
 // store system state in RTC memory so that it will be remembered through out sleep
-RTC_DATA_ATTR system_state state;
+RTC_DATA_ATTR uint16_t bootcount = 0;
+Settings config = Settings();
+platform device = platform();
+Gnss gnss = Gnss(&modem);
+Communication communications = Communication(&modem, &client, &config, callback_helper);
+
+uint32_t mode_change_timestamp;
+uint32_t last_location_timestamp;
+uint32_t last_movement_timestamp;
+uint32_t last_status_timestamp;
+
+bool initial_fix_received = false;
+
+static uint32_t time_to_sleep = 60 * 1000; //ms
+static uint32_t movement_timeout = 1 * 60 * 1000; //ms
+static uint32_t location_min_interval = 10 * 1000; //ms
+static uint32_t status_interval = 30 * 1000;
+
+void callback_helper(char* topic, byte* payload, unsigned int len)
+{
+    communications.mqtt_callback(topic, payload, len);
+}
 
 void setup()
 {
     Serial.begin(115200);
-
+    while(!Serial);
+    delay(1000);
+    INFO("SIM7000-tracker, Eero Silfverberg, 2023");
+    if (bootcount == 0) {
+        config.set_mode(system_mode::sleep);
+    } else {
+        INFO("Woken up from deep sleep");
+        config.set_mode(system_mode::sleep);
+    }
+    communications.init();
+    bootcount++;
+    mode_change_timestamp = millis();
 }
 
 void loop()
 {
-    switch (state)
-    {
-    case system_state::idle:
-        if(5 min passed)
-        {
-            state = system_state::sleep;
+    // event state machine
+    platform::event event = device.get_event();
+
+    switch (event) {
+        case platform::event::charger_plugged: break;
+        case platform::event::magnet: INFO("Magnet detected"); break;
+        case platform::event::movement: {
+            last_movement_timestamp = millis();
+            //mode_change_timestamp = millis();
+            INFO("Movement detected");
+            break;
         }
-        // wait for instructions or OTA update
-        break;
-    case system_state::hibernate:
-    {
-
+        default: break;
     }
-    case system_state::track_force:
-    {
-        // make sure that we are connented to MQTT and internet
-        // make sure that we have GNSS fix
-        // 
-        if(connected_to_mqtt)
-        else
-        {
-            communication.try_to_connect_to_mqtt_broker();
 
+    switch (config.get_mode()) {
+        case system_mode::hibernate: {
+            //set modem to sleep
+            communications.set_state(Communication::modem_state::off);
+            if (communications.modem_is_off()) {
+                device.set_wake_up_device(platform::wake_up_device::magnet);
+                config.set_mode(system_mode::sleep);
+                INFO("Going to deep sleep");
+                device.deep_sleep();
+            }
+            break;
         }
+        case system_mode::sleep: {
+            if (util::get_time_diff(mode_change_timestamp) > time_to_sleep) {
+                communications.set_state(Communication::modem_state::off);
+                if (communications.modem_is_off()) {
+                    device.set_wake_up_device(platform::wake_up_device::movement);
+                    INFO("Going to light sleep");
+                    Serial.flush();
+                    device.sleep(60*60); // sec <-- should be about 1h
+                    // Woken up here
+                    mode_change_timestamp = millis();
+                    communications.set_state(Communication::modem_state::mqtt_connected);
+                    INFO("Woken up from sleep");
+                }
+            } else {
+                communications.set_state(Communication::modem_state::mqtt_connected);
+            }
+            break;
+        }
+        case system_mode::track: {
+            if (util::get_time_diff(last_movement_timestamp) < movement_timeout || !initial_fix_received) {
+                if(!communications.connected_to_mqtt_broker())
+                {
+                    communications.set_state(Communication::modem_state::mqtt_connected);
+                }
+                if(!gnss.is_on() && !communications.modem_is_off())
+                {
+                    gnss.turn_on();
+                }
 
-        break;
-    }
-    default:
-        break;
+                else if (!communications.connected_to_mqtt_broker()) {
+                    communications.set_state(Communication::modem_state::mqtt_connected);
+                }
+                else
+                {
+                    // gnss on and connected
+                    if(gnss.has_fix())
+                    {
+                        initial_fix_received = true;
+                        if (util::get_time_diff(last_location_timestamp) > location_min_interval) {
+                            // send location here
+                            location_update loc;
+                            gnss.get_location(&loc);
+                            communications.send_location(&loc);
+                            INFO("POSITION SENT!");
+                            last_location_timestamp = millis();
+                        }
+                    }
+                    else
+                    {
+                        INFO("Waiting for GNSS fix");
+                    }
+                }
+            }
+            else //kulunut liikaa aikaa
+            {
+                gnss.turn_off();
+                communications.set_state(Communication::modem_state::off);
+                if (communications.modem_is_off()) {
+                    INFO("Going to sleep");
+                    Serial.flush();
+                    device.set_wake_up_device(platform::wake_up_device::movement);
+                    device.sleep();
+                    INFO("Woken up from sleep");
+                    
+                    // here when woken up by movement
+                    last_movement_timestamp = millis();
+                    communications.set_state(Communication::modem_state::mqtt_connected);
+                }
+            }
+
+            break;
+        }
+        case system_mode::ota: {
+            // ota mode received
+            // wait for wifi details, if no details in 5 min, go to sleep
+            break;
+        }
+        case system_mode::idle: {
+            // stay connected, idle
+            if (!communications.connected_to_mqtt_broker()) {
+                communications.set_state(Communication::modem_state::mqtt_connected);
+            }
+            break;
+        }
+        default: break;
     }
 
-    // Requests
+    if(communications.connected_to_mqtt_broker() && util::get_time_diff(last_status_timestamp) > status_interval)
+    {
+        communications.send_status(device.get_soc());
+        last_status_timestamp = millis();
+    }
 
 
     // Updates
-    communications.update(); // Update communications state machine and keep the device in desired state
-
+    communications.update();
+    device.update();
+    gnss.update();
 }

@@ -2,6 +2,7 @@
 
 #include "Arduino.h"
 
+/*
 class Button
 {
     public:
@@ -11,3 +12,4 @@ class Button
     private:
         uint8_t m_pin;
 };
+*/

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arduino.h"
+/*
 
 class System
 {
@@ -14,3 +15,4 @@ class System
         uint16_t m_update_interval;
         
 }
+*/

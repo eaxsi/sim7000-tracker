@@ -1,12 +1,7 @@
 #pragma once
 
-
-#ifdef NDEBUG
-#define DEBUG_PRINTF(label, format, args...) (void)(0)
-#else
-#define DEBUG_PRINTF(label, format, args...) do { Serial.printf("[" label "] " format " (%s:%d:%s)\r\n", ##args, __FILE__, __LINE__, __func__); Serial.flush(); } while(0)
-#endif
-
-#define INFO(format, args...) DEBUG_PRINTF("  INFO ", format, ##args)
-#define WARNING(format, args...) DEBUG_PRINTF("WARNING", format, ##args)
-#define ERROR(format, args...) DEBUG_PRINTF(" ERROR ", format, ##args)
+#define INFO(x); Serial.print(F("[  INFO ] ")); Serial.println(F(x))
+#define INFO_VALUE(x, y); Serial.print(F("[  INFO ] ")); Serial.print(F(x)); Serial.println(y)
+#define DEBUG_VALUE(value) Serial.println(value)
+#define WARNING(value) Serial.print(F("[WARNING] ")); Serial.println(value)
+#define ERROR(value) Serial.print(F("[ ERROR ] ")); Serial.println(value)

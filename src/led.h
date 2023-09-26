@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "Arduino.h"
 
+/*
 class Led
 {
     public:
@@ -16,3 +17,4 @@ class Led
         bool m_state;
         bool m_reverse_logic;
 };
+*/

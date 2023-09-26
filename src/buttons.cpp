@@ -1,6 +1,6 @@
 #include "buttons.h"
 
-
+/*
 void Buttons::update()
 {
     uint8_t i;
@@ -36,3 +36,4 @@ bool Buttons::all_pressed()
     }
     return ret;
 }
+*/

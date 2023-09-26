@@ -1,6 +1,6 @@
 #include "ui.h"
 
-
+/*
 void Ui::update()
 {
     m_lights.update();
@@ -25,5 +25,6 @@ void Ui::testmode()
     update();
     delay(100);
 }
+*/
 
 

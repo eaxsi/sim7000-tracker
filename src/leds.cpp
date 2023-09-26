@@ -1,4 +1,5 @@
 #include "leds.h"
+/*
 
 void Leds::turn_off()
 {
@@ -40,3 +41,4 @@ void Leds::static_light()
         m_internal_led.turn_on();
     }
 }
+*/

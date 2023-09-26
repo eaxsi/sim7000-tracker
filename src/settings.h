@@ -1,13 +1,20 @@
 #pragma once
 
-#include "Arduino.h"
-
+#include "common.h"
 
 class Settings
 {
     public:
+        Settings();
+
+        //bool node_id_available(); const
+        //char * get_node_id(); const
+        system_mode get_mode();
+
+        //void set_node_id(char *node_id);
+        void set_mode(system_mode mode);
+
     private:
-        position_interval;
-        sysinfo_interval;
-        enum m_mode { hibernate = 1, normal = 2, always_on = 3, power_save = 4 };
-}
+        //char m_nodeId[8] = "";
+        static inline system_mode m_mode = system_mode::sleep;
+};
