@@ -1,5 +1,6 @@
 Language: Cpp
 BasedOnStyle: LLVM
+IndentAccessModifiers: true
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 #AlignConsecutiveMacros: false
