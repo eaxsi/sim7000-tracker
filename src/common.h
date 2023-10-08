@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Arduino.h"
+
 enum class system_mode { hibernate, sleep, track, ota, idle };
 enum system_event { movement, magnet, charger_plugged, change_of_mode };
 
@@ -10,4 +12,13 @@ struct location_update
         float speed;
         float alt;
         float accuracy;
+        uint16_t course;
+        int vsat;
+        int usat;
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+        int second;
 };
