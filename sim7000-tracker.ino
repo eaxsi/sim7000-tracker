@@ -39,7 +39,7 @@ bool initial_fix_received = false;
 static uint32_t time_to_sleep = 60 * 1000; //ms
 static uint32_t movement_timeout = 1 * 60 * 1000; //ms
 static uint32_t location_min_interval = 10 * 1000; //ms
-static uint32_t status_interval = 30 * 1000;
+static uint32_t status_interval = 90 * 1000;
 
 void callback_helper(char* topic, byte* payload, unsigned int len)
 {
@@ -73,7 +73,6 @@ void loop()
         case platform::event::magnet: INFO("Magnet detected"); break;
         case platform::event::movement: {
             last_movement_timestamp = millis();
-            //mode_change_timestamp = millis();
             INFO("Movement detected");
             break;
         }
@@ -181,7 +180,7 @@ void loop()
 
     if(communications.connected_to_mqtt_broker() && util::get_time_diff(last_status_timestamp) > status_interval)
     {
-        communications.send_status(device.get_soc());
+        communications.send_status(device.get_soc(), device.charging());
         last_status_timestamp = millis();
     }
 
