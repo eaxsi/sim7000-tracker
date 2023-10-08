@@ -27,19 +27,39 @@ bool Gnss::has_fix()
 
 bool Gnss::get_location(location_update* loc)
 {
-    return m_modem->getGPS(&loc->lat,
-                    &loc->lon,
-                    &loc->speed,
-                    &loc->alt,
-                    nullptr,
-                    nullptr,
-                    &loc->accuracy,
-                    nullptr,
-                    nullptr,
-                    nullptr,
-                    nullptr,
-                    nullptr,
-                    nullptr);
+    m_old_loc = m_loc;    
+
+    bool fix = m_modem->getGPS(
+                    &m_loc.lat,
+                    &m_loc.lon,
+                    &m_loc.speed,
+                    &m_loc.alt,
+                    &m_loc.vsat,
+                    &m_loc.usat,
+                    &m_loc.accuracy,
+                    &m_loc.year,
+                    &m_loc.month,
+                    &m_loc.day,
+                    &m_loc.hour,
+                    &m_loc.minute,
+                    &m_loc.second);
+
+    loc->lat = m_loc.lat;
+    loc->lon = m_loc.lon;
+    loc->speed = m_loc.speed;
+    loc->alt = m_loc.alt;
+    loc->vsat = m_loc.vsat;
+    loc->usat = m_loc.usat;
+    loc->accuracy = m_loc.accuracy;
+
+
+    bool time_not_changed = m_loc.year == m_old_loc.year && m_loc.month == m_old_loc.month && m_loc.day == m_old_loc.day && m_loc.hour == m_old_loc.hour && m_loc.minute == m_old_loc.minute && m_loc.second == m_old_loc.second;
+    bool location_not_changed = m_loc.lat == m_old_loc.lat && m_loc.lon == m_old_loc.lon && m_loc.alt == m_old_loc.alt;
+
+    loc->course = get_bearing(m_loc.lat, m_loc.lon, m_old_loc.lat, m_old_loc.lon);
+    m_device_stuck = time_not_changed && location_not_changed;
+
+    return fix;
 }
 
 bool Gnss::turn_on_impl()
@@ -80,6 +100,22 @@ bool Gnss::has_fix_impl()
 
 }
 
+float Gnss::get_bearing(float lat,float lon,float lat2,float lon2)
+{
+    float teta1 = radians(lat);
+    float teta2 = radians(lat2);
+    float delta1 = radians(lat2-lat);
+    float delta2 = radians(lon2-lon);
+
+    float y = sin(delta2) * cos(teta2);
+    float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
+    float brng = atan2(y,x);
+    brng = degrees(brng);
+    brng = ( ((int)brng + 360) % 360 );
+
+    return brng;
+}
+
 void Gnss::update()
 {
     switch (m_state) {
@@ -113,6 +149,14 @@ void Gnss::update()
                 // turn off
                 turn_off_impl();
                 m_state = state::off;
+            }
+
+            bool non_valid_data = m_loc.vsat > 10000 && m_loc.usat == 0;
+            if(non_valid_data || m_device_stuck)
+            {
+                turn_off_impl();
+                turn_on_impl();
+                m_state = state::no_fix;
             }
             break;
         }
