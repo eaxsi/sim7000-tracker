@@ -11,6 +11,9 @@ platform::platform()
     digitalWrite(LED_PIN, LOW);
 
     setCpuFrequencyMhz(80); // Save enery by lowering CPU-frequency
+
+    // init battery voltage
+    m_battery_voltage = get_raw_battery_voltage();
 }
 
 platform::event platform::get_event()
@@ -87,14 +90,31 @@ void platform::deep_sleep(uint32_t timeout)
 
 uint8_t platform::get_soc()
 {
-    float voltage = map(analogRead(V_BATT_PIN), 0, 4095, 0, 6600);
-    int raw_soc = map(voltage, 2770, 3500, 0, 100);
+    int raw_soc = map(m_battery_voltage, 2400, 3560, 0, 100);
     return (uint8_t)constrain(raw_soc, 0, 100);
+}
+
+float platform::get_voltage()
+{
+    return m_battery_voltage;
+}
+
+float platform::get_raw_battery_voltage()
+{
+    return map(analogRead(V_BATT_PIN), 0, 4095, 0, 6600);
+}
+
+bool platform::charging()
+{
+    return m_battery_voltage < 100;
 }
 
 void platform::update()
 {
-
+    if (util::get_time_diff(m_voltage_measurement_timemstamp) > m_voltage_measurement_interval) {
+        m_battery_voltage = 0.1f * get_raw_battery_voltage() + 0.9f * m_battery_voltage;
+        m_voltage_measurement_timemstamp = millis();
+    }
     // Check if
 
     // Raising edge magnet
