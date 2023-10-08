@@ -169,7 +169,7 @@ bool Communication::send_location(location_update* l)
 {
     if (connected_to_mqtt_broker()) {
         char str[80];
-        sprintf(str, "%f,%f,%f,%f", l->lat, l->lon, l->speed, l->alt, l->accuracy);
+        sprintf(str, "%f,%f,%f,%f,%f,%d,%d,%d", l->lat, l->lon, l->speed, l->alt, l->accuracy, l->course, l->vsat, l->usat);
         updateValue(LOC_UPDATE_TOPIC, str);
         return true;
     } else {
@@ -177,11 +177,11 @@ bool Communication::send_location(location_update* l)
     }
 }
 
-bool Communication::send_status(uint8_t soc)
+bool Communication::send_status(uint8_t soc, bool charging)
 {
     if (connected_to_mqtt_broker()) {
         char str[80];
-        sprintf(str, "%d,%d", soc, get_signal_strength());
+        sprintf(str, "%d,%d,%d", soc, get_signal_strength(), charging);
         updateValue(STATUS_TOPIC, str);
         return true;
     } else {

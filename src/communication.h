@@ -36,7 +36,7 @@ class Communication
         bool modem_is_off();
         void mqtt_callback(char* topic, byte* payload, unsigned int len);
         bool send_location(location_update* loc);
-        bool send_status(uint8_t soc);
+        bool send_status(uint8_t soc, bool charging);
 
     private:
         bool connect_mqtt();
