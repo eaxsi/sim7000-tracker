@@ -55,7 +55,7 @@ bool Gnss::get_location(location_update* loc)
     bool time_not_changed = m_loc.year == m_old_loc.year && m_loc.month == m_old_loc.month && m_loc.day == m_old_loc.day && m_loc.hour == m_old_loc.hour && m_loc.minute == m_old_loc.minute && m_loc.second == m_old_loc.second;
     bool location_not_changed = m_loc.lat == m_old_loc.lat && m_loc.lon == m_old_loc.lon && m_loc.alt == m_old_loc.alt;
 
-    loc->course = get_bearing(m_loc.lat, m_loc.lon, m_old_loc.lat, m_old_loc.lon);
+    loc->course = get_bearing(m_old_loc.lat, m_old_loc.lon, m_loc.lat, m_loc.lon);
     m_device_stuck = time_not_changed && location_not_changed;
 
     return fix;
