@@ -25,6 +25,11 @@ bool Gnss::has_fix()
     return m_state == state::fix;
 }
 
+bool Gnss::has_initial_fix()
+{
+    return m_initial_fix_received;
+}
+
 bool Gnss::get_location(location_update* loc)
 {
     m_old_loc = m_loc;    
@@ -138,6 +143,7 @@ void Gnss::update()
             else if(has_fix_impl())
             {
                 m_state = state::fix;
+                m_initial_fix_received = true;
             }
             break;
         }

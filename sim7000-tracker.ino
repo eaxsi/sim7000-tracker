@@ -35,8 +35,6 @@ uint32_t last_movement_timestamp;
 uint32_t last_status_timestamp;
 uint32_t last_setting_request_timestamp;
 
-bool initial_fix_received = false;
-
 static uint32_t time_to_sleep = 60 * 1000; //ms
 static uint32_t movement_timeout = 1 * 60 * 1000; //ms
 static uint32_t location_min_interval = 10 * 1000; //ms
@@ -113,7 +111,7 @@ void loop()
             break;
         }
         case system_mode::track: {
-            if (util::get_time_diff(last_movement_timestamp) < movement_timeout || !initial_fix_received) {
+            if (util::get_time_diff(last_movement_timestamp) < movement_timeout || !gnss.has_initial_fix()) {
                 if(!communications.connected_to_mqtt_broker())
                 {
                     communications.set_state(Communication::modem_state::mqtt_connected);
@@ -131,7 +129,6 @@ void loop()
                     // gnss on and connected
                     if(gnss.has_fix())
                     {
-                        initial_fix_received = true;
                         if (util::get_time_diff(last_location_timestamp) > location_min_interval) {
                             // send location here
                             location_update loc;

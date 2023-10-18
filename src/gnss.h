@@ -14,6 +14,7 @@ class Gnss
         void turn_off();
         bool is_on();
         bool has_fix();
+        bool has_initial_fix();
         bool get_location(location_update* l);
         void update();
 
@@ -29,4 +30,5 @@ class Gnss
         location_update m_loc;
         location_update m_old_loc;
         bool m_device_stuck = false;
+        bool m_initial_fix_received = false;
 };
