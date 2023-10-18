@@ -37,6 +37,7 @@ class Communication
         void mqtt_callback(char* topic, byte* payload, unsigned int len);
         bool send_location(location_update* loc);
         bool send_status(uint8_t soc, bool charging);
+        bool request_settings();
 
     private:
         bool connect_mqtt();
@@ -44,7 +45,7 @@ class Communication
         void turn_modem_off();
         void turn_modem_on();
         void get_topic_name(char* topic_buf, char* topic_name);
-        void updateValue(char* topic_name, char* value_buffer);
+        bool updateValue(char* topic_name, char* value_buffer);
         uint8_t get_signal_strength();
 
         modem_state m_modem_state;

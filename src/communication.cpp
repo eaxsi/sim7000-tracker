@@ -189,6 +189,15 @@ bool Communication::send_status(uint8_t soc, bool charging)
     }
 }
 
+bool Communication::request_settings()
+{
+    if (connected_to_mqtt_broker()) {
+        return updateValue(SETTINGS_REQUEST_TOPIC, "1");
+    } else {
+        return false;
+    }
+}
+
 uint8_t Communication::get_signal_strength()
 {
     return (m_modem->getSignalQuality() * 827 + 127) >> 8;
@@ -284,9 +293,9 @@ void Communication::get_topic_name(char* topic_buf, char* topic_name)
     strcat(topic_buf, topic_name);
 }
 
-void Communication::updateValue(char* topic_name, char* value_buffer)
+bool Communication::updateValue(char* topic_name, char* value_buffer)
 {
     char topic_buffer[50] = "";
     get_topic_name(topic_buffer, topic_name);
-    m_mqtt.publish(topic_buffer, value_buffer);
+    return m_mqtt.publish(topic_buffer, value_buffer);
 }

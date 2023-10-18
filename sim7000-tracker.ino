@@ -33,6 +33,7 @@ uint32_t mode_change_timestamp;
 uint32_t last_location_timestamp;
 uint32_t last_movement_timestamp;
 uint32_t last_status_timestamp;
+uint32_t last_setting_request_timestamp;
 
 bool initial_fix_received = false;
 
@@ -40,6 +41,7 @@ static uint32_t time_to_sleep = 60 * 1000; //ms
 static uint32_t movement_timeout = 1 * 60 * 1000; //ms
 static uint32_t location_min_interval = 10 * 1000; //ms
 static uint32_t status_interval = 90 * 1000;
+static uint32_t setting_request_interval = 5 * 60 * 1000;
 
 void callback_helper(char* topic, byte* payload, unsigned int len)
 {
@@ -54,6 +56,7 @@ void setup()
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
     if (bootcount == 0) {
         config.set_mode(system_mode::sleep);
+        last_setting_request_timestamp = setting_request_interval; // request settings at every bootup
     } else {
         INFO("Woken up from deep sleep");
         config.set_mode(system_mode::sleep);
@@ -178,10 +181,18 @@ void loop()
         default: break;
     }
 
-    if(communications.connected_to_mqtt_broker() && util::get_time_diff(last_status_timestamp) > status_interval)
+    if(communications.connected_to_mqtt_broker())
     {
-        communications.send_status(device.get_soc(), device.charging());
-        last_status_timestamp = millis();
+        if(util::get_time_diff(last_status_timestamp) > status_interval)
+        {
+            communications.send_status(device.get_soc(), device.charging());
+            last_status_timestamp = millis();
+        }
+        if(util::get_time_diff(last_setting_request_timestamp) > setting_request_interval)
+        {
+            communications.request_settings();
+            last_setting_request_timestamp = millis();
+        }
     }
 
 
