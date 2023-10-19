@@ -54,7 +54,7 @@ void setup()
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
     if (bootcount == 0) {
         config.set_mode(system_mode::sleep);
-        last_setting_request_timestamp = setting_request_interval; // request settings at every bootup
+        last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
     } else {
         INFO("Woken up from deep sleep");
         config.set_mode(system_mode::sleep);
@@ -96,7 +96,7 @@ void loop()
             if (util::get_time_diff(mode_change_timestamp) > time_to_sleep) {
                 communications.set_state(Communication::modem_state::off);
                 if (communications.modem_is_off()) {
-                    device.set_wake_up_device(platform::wake_up_device::movement);
+                    device.set_wake_up_device(platform::wake_up_device::magnet);
                     INFO("Going to light sleep");
                     Serial.flush();
                     device.sleep(60*60); // sec <-- should be about 1h
