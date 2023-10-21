@@ -30,6 +30,11 @@ bool Gnss::has_initial_fix()
     return m_initial_fix_received;
 }
 
+bool Gnss::is_moving()
+{
+    return m_loc.speed >= m_moving_speed_threshold;
+}
+
 bool Gnss::get_location(location_update* loc)
 {
     m_old_loc = m_loc;    
