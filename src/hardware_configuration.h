@@ -16,8 +16,5 @@
 #define LED_PIN 12
 #define V_BATT_PIN 35
 
-#define REED_PIN GPIO_NUM_0
-#define ACC_SENSOR_PIN GPIO_NUM_32
-
-#define REED_PIN_ARD 0
-#define ACC_SENSOR_PIN_ARD 32
+#define REED_PIN 0
+#define ACC_SENSOR_PIN 32
