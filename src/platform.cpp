@@ -4,7 +4,6 @@ platform::platform()
 {
     //Pinmodes: voltagePin, accPin, reedPin
     pinMode(REED_PIN, INPUT_PULLUP);
-    pinMode(ACC_SENSOR_PIN, INPUT_PULLUP);
     pinMode(V_BATT_PIN, INPUT);
     pinMode(LED_PIN, OUTPUT);
 
@@ -21,10 +20,9 @@ platform::event platform::get_event()
     m_oldpinstates = m_pinstates;
 
     m_pinstates.magnet = digitalRead(REED_PIN);
-    m_pinstates.acc = digitalRead(ACC_SENSOR_PIN);
     m_pinstates.charger = analogRead(V_BATT_PIN) > 30;
 
-    if(m_pinstates.acc && m_pinstates.acc != m_oldpinstates.acc)
+    if(m_vibration_sensor.activated())
     {
         return event::movement;
     }
@@ -58,7 +56,7 @@ void platform::set_wake_up_device(platform::wake_up_device wake_up_device)
         case wake_up_device::movement: // light sleep
             rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off
             rtc_gpio_pullup_en((gpio_num_t)ACC_SENSOR_PIN);
-            esp_sleep_enable_ext0_wakeup((gpio_num_t)ACC_SENSOR_PIN,1); //1 = Low to High, 0 = High to Low. Pin pulled HIGH      
+            esp_sleep_enable_ext0_wakeup((gpio_num_t)ACC_SENSOR_PIN, !m_vibration_sensor.get_state()); //1 = Low to High, 0 = High to Low. Pin pulled HIGH      
             break;
         default: break;
     }
@@ -114,6 +112,7 @@ void platform::update()
         m_battery_voltage = 0.1f * get_raw_battery_voltage() + 0.9f * m_battery_voltage;
         m_voltage_measurement_timemstamp = millis();
     }
+    m_vibration_sensor.update();
     // Check if
 
     // Raising edge magnet

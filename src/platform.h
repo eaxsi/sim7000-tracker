@@ -6,6 +6,7 @@
 #include "hardware_configuration.h"
 #include "log.h"
 #include "util.h"
+#include "vibration_sensor.h"
 
 class platform
 {
@@ -41,4 +42,5 @@ class platform
         float m_battery_voltage;
         uint32_t m_voltage_measurement_timemstamp;
         uint32_t m_voltage_measurement_interval = 1000;
+        vibration_sensor m_vibration_sensor = vibration_sensor(ACC_SENSOR_PIN);
 };

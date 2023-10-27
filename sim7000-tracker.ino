@@ -197,4 +197,6 @@ void loop()
     communications.update();
     device.update();
     gnss.update();
+
+    delay(10);
 }
