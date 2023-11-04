@@ -1,7 +1,5 @@
 #include "led.h"
 
-/*
-
 void Led::turn_on()
 {
     m_state = true;
@@ -32,4 +30,3 @@ bool Led::get()
 {
     return m_state;
 }
-*/

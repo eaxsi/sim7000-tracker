@@ -2,12 +2,9 @@
 
 platform::platform()
 {
-    //Pinmodes: voltagePin, accPin, reedPin
     pinMode(REED_PIN, INPUT_PULLUP);
     pinMode(V_BATT_PIN, INPUT);
-    pinMode(LED_PIN, OUTPUT);
-
-    digitalWrite(LED_PIN, LOW);
+    m_led.turn_on();
 
     setCpuFrequencyMhz(80); // Save enery by lowering CPU-frequency
 
@@ -48,13 +45,12 @@ void platform::set_wake_up_device(platform::wake_up_device wake_up_device)
 {
     switch (wake_up_device) {
         case wake_up_device::magnet:
-            rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off
+            rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off during sleep
             rtc_gpio_pullup_en((gpio_num_t)REED_PIN);
-            //rtc_gpio_pulldown_en(GPIO_NUM_4); // TODO
             esp_sleep_enable_ext0_wakeup((gpio_num_t)REED_PIN, 0);
             break;
         case wake_up_device::movement: // light sleep
-            rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off
+            rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off during sleep
             rtc_gpio_pullup_en((gpio_num_t)ACC_SENSOR_PIN);
             esp_sleep_enable_ext0_wakeup((gpio_num_t)ACC_SENSOR_PIN, !m_vibration_sensor.get_state()); //1 = Low to High, 0 = High to Low. Pin pulled HIGH      
             break;
@@ -63,9 +59,9 @@ void platform::set_wake_up_device(platform::wake_up_device wake_up_device)
 }
 void platform::sleep()
 {
-    digitalWrite(LED_PIN, HIGH);
+    m_led.turn_off();
     esp_light_sleep_start();
-    digitalWrite(LED_PIN, LOW);
+    m_led.turn_on();
 }
 
 void platform::sleep(uint32_t timeout)
@@ -113,13 +109,4 @@ void platform::update()
         m_voltage_measurement_timemstamp = millis();
     }
     m_vibration_sensor.update();
-    // Check if
-
-    // Raising edge magnet
-
-    // Raising edge of motion sensor
-
-    // Charger plugged
-
-    // Charget disconnected
 }
