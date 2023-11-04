@@ -164,8 +164,6 @@ void loop()
             break;
         }
         case system_mode::ota: {
-            // ota mode received
-            // wait for wifi details, if no details in 5 min, go to sleep
             break;
         }
         case system_mode::idle: {
@@ -198,5 +196,4 @@ void loop()
     device.update();
     gnss.update();
 
-    delay(10);
 }

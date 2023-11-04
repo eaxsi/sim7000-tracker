@@ -7,6 +7,7 @@
 #include "../version.h"
 #include "mqtt_topics.h"
 #include "settings.h"
+#include "common.h"
 
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
@@ -38,6 +39,8 @@ class Communication
         bool send_location(location_update* loc);
         bool send_status(uint8_t soc, bool charging);
         bool request_settings();
+        bool get_ota_wifi_details(wifi_details *);
+        bool send_ota_status(String status);
 
     private:
         bool connect_mqtt();
@@ -59,6 +62,7 @@ class Communication
 
         bool m_settings_received = false;
         uint32_t m_status_check_timestamp = 0;
+        wifi_details m_wifi_details;
 
         TinyGsm* m_modem;
         TinyGsmClient* m_client;

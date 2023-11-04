@@ -1,4 +1,6 @@
 
+#include "common.h"
+#include "log.h"
 
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -11,24 +13,8 @@ class Ota
 {
     public:
         Ota();
-
-        // set wifi details
-        void set_wifi_details();
-
-        bool wifi_network_exits();
-
-        bool try_to_connect_to_wifi();
-
-        void start_update();
-
-        // check wifi exits
-
-        // check the file
-
-        // start update
-
-        // reboot
+        bool try_to_connect_to_wifi(wifi_details *);
+        void start();
     private:
-        char m_wifi_ssid[50] = "";
-        char m_wifi_passwd[50] = "";
+        wifi_details m_wifi_details;
 };

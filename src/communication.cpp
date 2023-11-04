@@ -118,6 +118,9 @@ bool Communication::connect_mqtt()
     get_topic_name(topic_buf, ERROR_SUBSCRIBE_TOPIC);
     m_mqtt.subscribe(topic_buf);
 
+    get_topic_name(topic_buf, OTA_SUBSCRIBE_TOPIC);
+    m_mqtt.subscribe(topic_buf);
+
     // send status messages
     //send_status();
 
@@ -160,6 +163,16 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             m_config->set_mode((system_mode)received_mode);
             INFO("Changing device mode");
         }
+        else if(i == 2 && strcmp(pt, "ota") == 0) {
+            payload[len] = '\0';
+            char wifi_ssid[50] = "";
+            char wifi_passwd[50] = "";
+            String s = String((char*)payload);
+            int sep_index = s.indexOf(":");
+            s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 50);
+            s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 50);
+            m_config->set_mode(system_mode::ota);
+        }
         pt = strtok(NULL, "/");
         i++;
     }
@@ -183,6 +196,18 @@ bool Communication::send_status(uint8_t soc, bool charging)
         char str[80];
         sprintf(str, "%d,%d,%d", soc, get_signal_strength(), charging);
         updateValue(STATUS_TOPIC, str);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool Communication::send_ota_status(String status)
+{
+    if (connected_to_mqtt_broker()) {
+        char str[80];
+        status.toCharArray(str, 80);
+        updateValue(OTA_STATUS_TOPIC, str);
         return true;
     } else {
         return false;
@@ -298,4 +323,19 @@ bool Communication::updateValue(char* topic_name, char* value_buffer)
     char topic_buffer[50] = "";
     get_topic_name(topic_buffer, topic_name);
     return m_mqtt.publish(topic_buffer, value_buffer);
+}
+
+bool Communication::get_ota_wifi_details(wifi_details * ota_wifi)
+{
+    /*
+    if(m_wifi_details.wifi_ssid != "" && m_wifi_details.wifi_passwd != "")
+    {
+        //strcpy(ota_wifi->wifi_ssid, m_wifi_details.wifi_ssid);
+        //strcpy(ota_wifi->wifi_passwd, m_wifi_details.wifi_passwd);
+        return true;
+    }
+    else
+        return false;
+    */
+   return true;
 }
