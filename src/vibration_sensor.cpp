@@ -10,7 +10,7 @@ vibration_sensor::vibration_sensor(uint8_t pin)
 
 void vibration_sensor::update()
 {
-    m_old_state == m_state;
+    m_old_state = m_state;
     m_state = digitalRead(m_pin);
 }
 
