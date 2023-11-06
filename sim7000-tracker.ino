@@ -16,6 +16,7 @@
 #include "src/platform.h"
 #include "src/settings.h"
 #include "src/util.h"
+#include "src/ota.h"
 
 TinyGsm modem = TinyGsm(MODEM_SERIAL);
 TinyGsmClient client = TinyGsmClient(modem);
@@ -164,6 +165,21 @@ void loop()
             break;
         }
         case system_mode::ota: {
+            wifi_details ota_wifi;
+            Ota ota = Ota();
+            /*
+            if(communications.get_ota_wifi_details(&ota_wifi))
+            {
+                if(ota.try_to_connect_to_wifi(&ota_wifi))
+                {
+                    Serial.println("Starting OTA");
+                    delay(100);
+                    ota.start();
+                }
+            }
+            */
+            config.set_mode(system_mode::sleep);
+
             break;
         }
         case system_mode::idle: {
@@ -195,5 +211,4 @@ void loop()
     communications.update();
     device.update();
     gnss.update();
-
 }

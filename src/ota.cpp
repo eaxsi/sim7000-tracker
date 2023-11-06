@@ -7,21 +7,15 @@ Ota::Ota()
 
 bool Ota::try_to_connect_to_wifi(wifi_details * ota_wifi)
 {
-    //strcpy(wifi_ssid, ota_wifi->wifi_ssid);
-    //strcpy(wifi_passwd, ota_wifi->wifi_passwd);
-    //Serial.println(ota_wifi->wifi_ssid);
-    //Serial.println(ota_wifi->wifi_passwd);
-    //Serial.println(wifi_ssid);
-    //Serial.println(wifi_passwd);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ota_wifi->wifi_ssid, ota_wifi->wifi_passwd);
 
-    /*
     long wifi_connecting_timestamp = millis();
     while (WiFi.status() != WL_CONNECTED || wifi_connecting_timestamp + 15 * 1000 < millis()) {
         delay(500);
         INFO("Connecting to WiFi...");
     }
     return (WiFi.status() == WL_CONNECTED);
-    */
 }
 
 void Ota::start()

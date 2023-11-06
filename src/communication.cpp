@@ -169,8 +169,8 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             char wifi_passwd[50] = "";
             String s = String((char*)payload);
             int sep_index = s.indexOf(":");
-            s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 50);
-            s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 50);
+            s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 40);
+            s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 40);
             m_config->set_mode(system_mode::ota);
         }
         pt = strtok(NULL, "/");
@@ -327,15 +327,14 @@ bool Communication::updateValue(char* topic_name, char* value_buffer)
 
 bool Communication::get_ota_wifi_details(wifi_details * ota_wifi)
 {
-    /*
     if(m_wifi_details.wifi_ssid != "" && m_wifi_details.wifi_passwd != "")
     {
-        //strcpy(ota_wifi->wifi_ssid, m_wifi_details.wifi_ssid);
-        //strcpy(ota_wifi->wifi_passwd, m_wifi_details.wifi_passwd);
+        strcpy(ota_wifi->wifi_ssid, m_wifi_details.wifi_ssid);
+        strcpy(ota_wifi->wifi_passwd, m_wifi_details.wifi_passwd);
         return true;
     }
     else
+    {
         return false;
-    */
-   return true;
+    }
 }
