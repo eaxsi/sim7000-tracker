@@ -15,6 +15,7 @@
 #define SD_CS 13
 #define LED_PIN 12
 #define V_BATT_PIN 35
+#define V_CHARGING_PIN 36
 
 #define REED_PIN 0
 #define ACC_SENSOR_PIN 32

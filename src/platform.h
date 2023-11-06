@@ -8,6 +8,7 @@
 #include "util.h"
 #include "vibration_sensor.h"
 #include "led.h"
+#include "battery.h"
 
 class platform
 {
@@ -31,7 +32,6 @@ class platform
         void sleep(uint32_t timeout); // in s
         void deep_sleep();
         void deep_sleep(uint32_t timeout); // in s
-        float get_raw_battery_voltage();
         bool charging();
 
         void update();
@@ -40,9 +40,8 @@ class platform
         uint16_t m_update_interval;
         pinstates m_pinstates;
         pinstates m_oldpinstates;
-        float m_battery_voltage;
-        uint32_t m_voltage_measurement_timemstamp;
-        uint32_t m_voltage_measurement_interval = 1000;
+
         vibration_sensor m_vibration_sensor = vibration_sensor(ACC_SENSOR_PIN);
         Led m_led = Led(LED_PIN, true);
+        Battery m_battery = Battery(V_BATT_PIN, V_CHARGING_PIN);
 };
