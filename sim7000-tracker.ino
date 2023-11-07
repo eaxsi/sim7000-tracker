@@ -53,12 +53,12 @@ void setup()
     while(!Serial);
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
-    if (bootcount == 0) {
-        config.set_mode(system_mode::sleep);
-        last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
-    } else {
+
+    config.set_mode(system_mode::sleep);
+    last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
+
+    if (bootcount != 0) {
         INFO("Woken up from deep sleep");
-        config.set_mode(system_mode::sleep);
     }
     communications.init();
     bootcount++;
