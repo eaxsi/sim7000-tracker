@@ -1,8 +1,11 @@
 #pragma once
 
 #include "hardware_configuration.h"
+
 #include <TinyGsmClient.h>
+
 #include "common.h"
+
 
 class Gnss
 {

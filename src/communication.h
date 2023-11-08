@@ -1,16 +1,18 @@
 #pragma once
 
 #include "Arduino.h"
+
 #include "hardware_configuration.h"
-#include "log.h"
-#include "../config.h"
-#include "../version.h"
-#include "mqtt_topics.h"
-#include "settings.h"
-#include "common.h"
 
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
+
+#include "../config.h"
+#include "../version.h"
+#include "common.h"
+#include "log.h"
+#include "mqtt_topics.h"
+#include "settings.h"
 
 #define MQTT_VERSION MQTT_VERSION_3_1
 

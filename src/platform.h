@@ -3,12 +3,12 @@
 #include "Arduino.h"
 #include "driver/rtc_io.h"
 
+#include "battery.h"
 #include "hardware_configuration.h"
+#include "led.h"
 #include "log.h"
 #include "util.h"
 #include "vibration_sensor.h"
-#include "led.h"
-#include "battery.h"
 
 class platform
 {

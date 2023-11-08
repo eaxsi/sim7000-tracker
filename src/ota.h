@@ -1,13 +1,13 @@
+#pragma once
 
-#include "common.h"
-#include "log.h"
-
-#include <WiFi.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
+#include <WiFi.h>
 #include <time.h>
 
 #include "../config.h"
+#include "common.h"
+#include "log.h"
 
 class Ota
 {

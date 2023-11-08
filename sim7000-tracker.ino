@@ -3,20 +3,20 @@
     Based on LilyGO-T-SIM7000G board
 */
 
+#include "Arduino.h"
+
 #include "src/hardware_configuration.h"
 
 #include <TinyGsmClient.h>
-#include "Arduino.h"
 
 #include "src/common.h"
 #include "src/communication.h"
 #include "src/gnss.h"
-#include "src/hardware_configuration.h"
 #include "src/log.h"
+#include "src/ota.h"
 #include "src/platform.h"
 #include "src/settings.h"
 #include "src/util.h"
-#include "src/ota.h"
 
 TinyGsm modem = TinyGsm(MODEM_SERIAL);
 TinyGsmClient client = TinyGsmClient(modem);

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "hardware_configuration.h"
 #include "Arduino.h"
+
+#include "hardware_configuration.h"
 
 class vibration_sensor
 {
