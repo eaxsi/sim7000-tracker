@@ -43,5 +43,5 @@ class platform
 
         vibration_sensor m_vibration_sensor = vibration_sensor(ACC_SENSOR_PIN);
         Led m_led = Led(LED_PIN, true);
-        Battery m_battery = Battery(V_BATT_PIN, V_CHARGING_PIN);
+        Battery m_battery = Battery(V_BATT_PIN);
 };
