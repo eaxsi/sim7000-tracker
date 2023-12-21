@@ -40,6 +40,8 @@ class platform
         uint16_t m_update_interval;
         pinstates m_pinstates;
         pinstates m_oldpinstates;
+        uint32_t m_led_blink_interval = 2000; //ms
+        uint8_t m_blink_duty_cycle; // %
 
         vibration_sensor m_vibration_sensor = vibration_sensor(ACC_SENSOR_PIN);
         Led m_led = Led(LED_PIN, true);

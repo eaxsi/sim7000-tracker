@@ -94,6 +94,30 @@ bool platform::charging()
 
 void platform::update()
 {
+    if(m_battery.is_charging())
+    {
+        if(m_battery.get_soc() == 100)
+            m_blink_duty_cycle = 100;
+        else
+            m_blink_duty_cycle = 50;
+
+        //m_blink_duty_cycle = m_battery.get_soc() == 100 ? 100 : 50;
+    }
+    else
+    {
+        m_blink_duty_cycle = 10;
+    }
+    // Led blinking logic
+    uint8_t place_in_duty_cycle = (millis() % m_led_blink_interval)*100 / m_led_blink_interval;
+    if(place_in_duty_cycle > m_blink_duty_cycle && m_led.get())
+    {
+        m_led.turn_off();
+    }
+    else if(place_in_duty_cycle < m_blink_duty_cycle && !m_led.get())
+    {
+        m_led.turn_on();
+    }
+
     m_vibration_sensor.update();
     m_battery.update();
 }
