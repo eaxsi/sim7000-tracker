@@ -24,6 +24,6 @@ struct location_update
 };
 
 struct wifi_details{
-        char wifi_ssid[50] = "";
-        char wifi_passwd[50] = "";
+        char wifi_ssid[50];
+        char wifi_passwd[50];
 };

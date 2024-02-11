@@ -25,6 +25,7 @@ void callback_helper(char* topic, byte* payload, unsigned int len);
 
 // store system state in RTC memory so that it will be remembered through out sleep
 RTC_DATA_ATTR uint16_t bootcount = 0;
+RTC_DATA_ATTR wifi_details ota_wifi_details;
 Settings config = Settings();
 platform device = platform();
 Gnss gnss = Gnss(&modem);
@@ -53,6 +54,21 @@ void setup()
     while(!Serial);
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
+
+    // OTA mode
+    if(strlen(ota_wifi_details.wifi_ssid) > 0)
+    {
+        INFO("Staring OTA");
+        Ota ota = Ota();
+        if(ota.try_to_connect_to_wifi(&ota_wifi_details))
+        {
+            Serial.println("Connected to OTA wifi");
+            delay(100);
+            strcpy(ota_wifi_details.wifi_ssid,"");
+            strcpy(ota_wifi_details.wifi_passwd,"");
+            ota.start();
+        }
+    }
 
     config.set_mode(system_mode::sleep);
     last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
@@ -165,19 +181,13 @@ void loop()
             break;
         }
         case system_mode::ota: {
-            wifi_details ota_wifi;
-            Ota ota = Ota();
-            /*
-            if(communications.get_ota_wifi_details(&ota_wifi))
+
+            if(communications.get_ota_wifi_details(&ota_wifi_details))
             {
-                if(ota.try_to_connect_to_wifi(&ota_wifi))
-                {
-                    Serial.println("Starting OTA");
-                    delay(100);
-                    ota.start();
-                }
+                INFO("Wifi details copied from communication");
+                INFO(ota_wifi_details.wifi_ssid);
+                device.deep_sleep(1);
             }
-            */
             config.set_mode(system_mode::sleep);
 
             break;
