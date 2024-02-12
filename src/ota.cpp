@@ -10,10 +10,11 @@ bool Ota::try_to_connect_to_wifi(wifi_details * ota_wifi)
     WiFi.mode(WIFI_STA);
     WiFi.begin(ota_wifi->wifi_ssid, ota_wifi->wifi_passwd);
 
-    long wifi_connecting_timestamp = millis();
-    while (WiFi.status() != WL_CONNECTED || wifi_connecting_timestamp + 15 * 1000 < millis()) {
+    uint32_t wifi_connection_start_timestamp = millis();
+    while((util::get_time_diff(wifi_connection_start_timestamp) < 15*1000) && WiFi.status() != WL_CONNECTED)
+    {
+        INFO("Connecting to Wifi...");
         delay(500);
-        INFO("Connecting to WiFi...");
     }
     return (WiFi.status() == WL_CONNECTED);
 }

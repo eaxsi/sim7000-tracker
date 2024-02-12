@@ -51,6 +51,7 @@ void callback_helper(char* topic, byte* payload, unsigned int len)
 void setup()
 {
     Serial.begin(115200);
+    WiFi.mode(WIFI_OFF);
     while(!Serial);
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
@@ -62,11 +63,15 @@ void setup()
         Ota ota = Ota();
         if(ota.try_to_connect_to_wifi(&ota_wifi_details))
         {
-            Serial.println("Connected to OTA wifi");
+            INFO("Connected to OTA wifi");
             delay(100);
             strcpy(ota_wifi_details.wifi_ssid,"");
             strcpy(ota_wifi_details.wifi_passwd,"");
             ota.start();
+        }
+        else
+        {	
+            ESP.restart();
         }
     }
 
