@@ -62,7 +62,6 @@ class Communication
         uint8_t m_error;
         char m_nodeId[8] = "";
 
-        bool m_settings_received = false;
         uint32_t m_status_check_timestamp = 0;
         wifi_details m_wifi_details;
         bool m_first_connection = true;

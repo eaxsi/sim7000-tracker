@@ -40,8 +40,6 @@ bool Communication::init()
     INFO_VALUE("Node ID: ", m_nodeId);
 
     m_mqtt.setServer(BROKER_HOST, BROKER_PORT);
-    //m_mqtt.setCallback(mqtt_callback);
-    m_settings_received = false;
 
     uint8_t sim_status = m_modem->getSimStatus();
     if (sim_status == SIM_LOCKED) {
@@ -130,9 +128,6 @@ bool Communication::connect_mqtt()
         m_first_connection = false;
     }
 
-    if (!m_settings_received) {
-        //request_settings();
-    }
     m_mqtt.loop();
     return status;
 }
@@ -289,10 +284,6 @@ void Communication::update()
                 m_modem->gprsDisconnect();
             } else // Where we want to be
             {
-                if (!m_settings_received && millis() > 120000) {
-                    ERROR("Couldn't connect to MQTT broker!");
-                    m_error = 4;
-                }
             }
         } else if (m_modem_state == modem_state::mqtt_connected) {
             if (m_requested_modem_state < m_modem_state) {
@@ -300,10 +291,6 @@ void Communication::update()
                 disconnect_mqtt();
             } else if (m_requested_modem_state == m_modem_state) {
                 // Where we want to be
-                //if (!m_settings_received && millis() > 120000) {
-                //    ERROR("No settings received!");
-                //    m_error = 5;
-                //}
             }
         }
 
