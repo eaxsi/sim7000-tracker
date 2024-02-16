@@ -65,6 +65,7 @@ class Communication
         bool m_settings_received = false;
         uint32_t m_status_check_timestamp = 0;
         wifi_details m_wifi_details;
+        bool m_first_connection = true;
 
         TinyGsm* m_modem;
         TinyGsmClient* m_client;

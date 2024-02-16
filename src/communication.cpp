@@ -123,9 +123,12 @@ bool Communication::connect_mqtt()
 
     // send status messages
     //send_status();
-
-    get_topic_name(topic_buf, VERSION_TOPIC);
-    m_mqtt.publish(topic_buf, VERSION);
+    if(m_first_connection)
+    {
+        get_topic_name(topic_buf, VERSION_TOPIC);
+        m_mqtt.publish(topic_buf, VERSION);
+        m_first_connection = false;
+    }
 
     if (!m_settings_received) {
         //request_settings();
