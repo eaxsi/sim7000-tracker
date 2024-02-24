@@ -7,6 +7,7 @@
 #define MODEM_SERIAL_TX_PIN 27
 #define MODEM_SERIAL_RX_PIN 26
 #define MODEM_POWER_PIN 4
+#define MODEM_RESET_PIN 5
 #define MODEM_SERIAL Serial1
 
 #define SD_MISO 2

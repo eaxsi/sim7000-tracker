@@ -21,6 +21,25 @@ platform::event platform::get_event()
     }
     else if(!m_pinstates.magnet && m_pinstates.magnet != m_oldpinstates.magnet)
     {
+        m_sensor_hold_timestamp = millis();
+        m_led.turn_on();
+
+        while(!m_pinstates.magnet && m_pinstates.magnet != m_oldpinstates.magnet && !m_vibration_sensor.activated()) // while reed sensor is activated
+        {
+            m_pinstates.magnet = digitalRead(REED_PIN);
+            m_vibration_sensor.update();
+            if(util::get_time_diff(m_sensor_hold_timestamp) > 10*1000)
+            {
+                m_led.turn_off();
+                delay(100);
+                m_led.turn_on();
+                delay(100);
+                m_led.turn_off();
+
+                return event::long_magnet_hold;
+            }
+        }
+        m_led.turn_off();
         return event::magnet;
     }
     else if(!m_pinstates.charger && m_pinstates.charger != m_oldpinstates.charger)
@@ -77,6 +96,11 @@ void platform::deep_sleep(uint32_t timeout)
     deep_sleep();
 }
 
+void platform::restart()
+{
+    ESP.restart();
+}
+
 uint8_t platform::get_soc()
 {
     return m_battery.get_soc();
@@ -90,6 +114,19 @@ float platform::get_voltage()
 bool platform::charging()
 {
     return m_battery.is_charging();
+}
+
+void platform::led_blink_update()
+{
+    uint8_t place_in_duty_cycle = (millis() % m_led_blink_interval)*100 / m_led_blink_interval;
+    if(place_in_duty_cycle > m_blink_duty_cycle && m_led.get())
+    {
+        m_led.turn_off();
+    }
+    else if(place_in_duty_cycle < m_blink_duty_cycle && !m_led.get())
+    {
+        m_led.turn_on();
+    }
 }
 
 void platform::update()
@@ -107,17 +144,8 @@ void platform::update()
     {
         m_blink_duty_cycle = 10;
     }
-    // Led blinking logic
-    uint8_t place_in_duty_cycle = (millis() % m_led_blink_interval)*100 / m_led_blink_interval;
-    if(place_in_duty_cycle > m_blink_duty_cycle && m_led.get())
-    {
-        m_led.turn_off();
-    }
-    else if(place_in_duty_cycle < m_blink_duty_cycle && !m_led.get())
-    {
-        m_led.turn_on();
-    }
 
+    led_blink_update();
     m_vibration_sensor.update();
     m_battery.update();
 }

@@ -71,7 +71,7 @@ void setup()
         }
         else
         {	
-            ESP.restart();
+            device.restart();
         }
     }
 
@@ -97,6 +97,13 @@ void loop()
         case platform::event::movement: {
             last_movement_timestamp = millis();
             INFO("Movement detected");
+            break;
+        }
+        case platform::event::long_magnet_hold: {
+            WARNING("Restarting modem and device");
+            communications.reset_modem();
+            device.restart();
+            // Should not reach this
             break;
         }
         default: break;

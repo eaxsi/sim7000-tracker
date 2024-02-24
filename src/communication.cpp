@@ -12,7 +12,9 @@ Communication::Communication(TinyGsm* modem, TinyGsmClient* client,  Settings* c
     m_mqtt.setCallback(callback);
 
     pinMode(MODEM_POWER_PIN, OUTPUT);
+    pinMode(MODEM_RESET_PIN, OUTPUT);
     digitalWrite(MODEM_POWER_PIN, HIGH);
+    digitalWrite(MODEM_RESET_PIN, LOW);
 }
 
 bool Communication::init()
@@ -90,6 +92,14 @@ void Communication::turn_modem_on()
         digitalWrite(MODEM_POWER_PIN, LOW);
         delay(100);
     }
+}
+
+void Communication::reset_modem()
+{
+    digitalWrite(MODEM_RESET_PIN, HIGH);
+    delay(500);
+    digitalWrite(MODEM_RESET_PIN, LOW);
+    delay(500);
 }
 
 bool Communication::connect_mqtt()
@@ -248,7 +258,16 @@ void Communication::update()
         if (m_modem_state == modem_state::off) {
             if (m_requested_modem_state > m_modem_state) {
                 INFO("Turning modem on");
-                turn_modem_on();
+                if(m_modem_failed_turn_on_counter < 5)
+                {
+                    turn_modem_on();
+                    m_modem_failed_turn_on_counter++;
+                }
+                else
+                {
+                    reset_modem();
+                    m_modem_failed_turn_on_counter = 0;
+                }
             }
         } else if (m_modem_state == modem_state::not_registered_to_network) {
             /*
@@ -263,6 +282,7 @@ void Communication::update()
             if (m_requested_modem_state == modem_state::off) {
                 INFO("Turning modem off");
                 turn_modem_off();
+                m_modem_failed_turn_on_counter = 0;
             }
 
         } else if (m_modem_state == modem_state::registered_to_network) {

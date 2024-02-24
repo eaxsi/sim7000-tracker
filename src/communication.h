@@ -43,6 +43,7 @@ class Communication
         bool request_settings();
         bool get_ota_wifi_details(wifi_details *);
         bool send_ota_status(String status);
+        void reset_modem();
 
     private:
         bool connect_mqtt();
@@ -65,6 +66,7 @@ class Communication
         uint32_t m_status_check_timestamp = 0;
         wifi_details m_wifi_details;
         bool m_first_connection = true;
+        uint8_t m_modem_failed_turn_on_counter = 0;
 
         TinyGsm* m_modem;
         TinyGsmClient* m_client;
