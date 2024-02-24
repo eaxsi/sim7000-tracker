@@ -162,8 +162,9 @@ def print_status(devices: Device_updating_process):
         if(d.last_msg_timestamp):
             now = datetime.datetime.now()
             delta = now - d.last_msg_timestamp
+            time_str = int(delta.total_seconds())
 
-        print("{}|{}|{}|{}".format(d.id, d.state, d.version, int(delta.total_seconds())))
+        print("{}|{}|{}|{}".format(d.id, d.state, d.version, time_str))
 
 def main():
     try:
