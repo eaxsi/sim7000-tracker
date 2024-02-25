@@ -15,6 +15,7 @@
 #include "settings.h"
 
 #define MQTT_VERSION MQTT_VERSION_3_1
+#define TINY_GSM_USE_GPRS true
 
 class Communication
 {
