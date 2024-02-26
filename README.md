@@ -1,6 +1,6 @@
 # SIM7000 Tracker
 Arduino project based on the LilyGO-T-SIM7000G board with some additional sensors added.
-The trakcer sends location info from the device to a MQTT broker via LTE connection.
+The tracker sends location info from the device to a MQTT broker via LTE connection.
 
 # Hardware
 - LilyGO-T-SIM7000G
@@ -45,16 +45,16 @@ Edit the config.h file
 # Communication
 The tracker communicates using the MQTT protocol, which is a publish/subscribe -type protocol. 
 
-The tracker uses also HTTP for OTA-update downloading.
+The tracker also uses HTTP for OTA-update downloading.
 
 ## Tracker ID
 Tracker ID id an unique 7-numbered identifier for the tracker. It is made from the cellular modems IMEI-number.
 
 ## Connecting
-When the tracker connects to the tracker it updates the connected topic to 1. If the tracker connects to the broker first time after boot, it sends the  installed software version.
+When the tracker connects to the tracker it updates the connected topic to 1. If the tracker connects to the broker for the first time after boot, it sends the installed software version.
 
 ## Status
-The tracker sends periodically a status message that contains the battery state of charge(SOC), cellular signal strength and charging status. These values are sent as a comma separated string.
+The tracker periodically sends a status message that contains the battery state of charge(SOC), cellular signal strength and charging status. These values are sent as a comma separated string.
 
 | Order in message | Data                     | Datatype | Unit |
 |------------------|--------------------------|----------|------|
@@ -95,7 +95,7 @@ Example message: ```60.169900,24.938400,0.000000,14.500000,1.800000,194,23,4```
 - 4 satellites used
 
 ## Settings
-The device listens the MQTT broker for settings which in this case is the system mode.
+The device listens to the MQTT broker for settings which in this case is the system mode.
 The tracker has the following working modes:
 - 0: Hibernate, wake up only with magnet
 - 1: Sleep, Go online every 60 minutes, also wake up by magnet
@@ -105,4 +105,4 @@ The tracker has the following working modes:
 
 
 # Extras
-The repository also includes an updater utility to help with updating multiple devices. The updater is located in the util-folder. In order to use the updater, the MQTT-broker details needs to be set to the config.ini file.
+The repository also includes an updater utility to help with updating multiple devices. The updater is located in the util-folder. In order to use the updater, the MQTT-broker details need to be set to the config.ini file.
