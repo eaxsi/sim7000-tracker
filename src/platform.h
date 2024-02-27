@@ -15,12 +15,20 @@ class platform
     public:
         platform();
 
-        enum class event { movement, magnet, charger_plugged, charger_unplugged, long_magnet_hold, none };
+        enum class event {
+            movement,
+            magnet,
+            charger_plugged,
+            charger_unplugged,
+            long_magnet_hold,
+            none
+        };
         enum class wake_up_device { magnet, movement };
-        struct pinstates{
-            bool acc;
-            bool magnet;
-            bool charger;
+        struct pinstates
+        {
+                bool acc;
+                bool magnet;
+                bool charger;
         };
 
         uint8_t get_soc();

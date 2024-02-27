@@ -23,7 +23,8 @@ struct location_update
         int second;
 };
 
-struct wifi_details{
+struct wifi_details
+{
         char wifi_ssid[50];
         char wifi_passwd[50];
 };

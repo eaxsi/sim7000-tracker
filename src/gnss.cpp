@@ -37,22 +37,21 @@ bool Gnss::is_moving()
 
 bool Gnss::get_location(location_update* loc)
 {
-    m_old_loc = m_loc;    
+    m_old_loc = m_loc;
 
-    bool fix = m_modem->getGPS(
-                    &m_loc.lat,
-                    &m_loc.lon,
-                    &m_loc.speed,
-                    &m_loc.alt,
-                    &m_loc.vsat,
-                    &m_loc.usat,
-                    &m_loc.accuracy,
-                    &m_loc.year,
-                    &m_loc.month,
-                    &m_loc.day,
-                    &m_loc.hour,
-                    &m_loc.minute,
-                    &m_loc.second);
+    bool fix = m_modem->getGPS(&m_loc.lat,
+                               &m_loc.lon,
+                               &m_loc.speed,
+                               &m_loc.alt,
+                               &m_loc.vsat,
+                               &m_loc.usat,
+                               &m_loc.accuracy,
+                               &m_loc.year,
+                               &m_loc.month,
+                               &m_loc.day,
+                               &m_loc.hour,
+                               &m_loc.minute,
+                               &m_loc.second);
 
     loc->lat = m_loc.lat;
     loc->lon = m_loc.lon;
@@ -62,8 +61,11 @@ bool Gnss::get_location(location_update* loc)
     loc->accuracy = m_loc.accuracy;
     loc->speed = max(m_loc.speed, 0.0f);
 
-    bool time_not_changed = m_loc.year == m_old_loc.year && m_loc.month == m_old_loc.month && m_loc.day == m_old_loc.day && m_loc.hour == m_old_loc.hour && m_loc.minute == m_old_loc.minute && m_loc.second == m_old_loc.second;
-    bool location_not_changed = m_loc.lat == m_old_loc.lat && m_loc.lon == m_old_loc.lon && m_loc.alt == m_old_loc.alt;
+    bool time_not_changed = m_loc.year == m_old_loc.year && m_loc.month == m_old_loc.month
+                            && m_loc.day == m_old_loc.day && m_loc.hour == m_old_loc.hour
+                            && m_loc.minute == m_old_loc.minute && m_loc.second == m_old_loc.second;
+    bool location_not_changed
+        = m_loc.lat == m_old_loc.lat && m_loc.lon == m_old_loc.lon && m_loc.alt == m_old_loc.alt;
 
     loc->course = get_bearing(m_old_loc.lat, m_old_loc.lon, m_loc.lat, m_loc.lon);
     m_device_stuck = time_not_changed && location_not_changed;
@@ -94,33 +96,32 @@ bool Gnss::turn_off_impl()
 bool Gnss::has_fix_impl()
 {
     return m_modem->getGPS(nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr);
-
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           nullptr);
 }
 
-float Gnss::get_bearing(float lat,float lon,float lat2,float lon2)
+float Gnss::get_bearing(float lat, float lon, float lat2, float lon2)
 {
     float teta1 = radians(lat);
     float teta2 = radians(lat2);
-    float delta1 = radians(lat2-lat);
-    float delta2 = radians(lon2-lon);
+    float delta1 = radians(lat2 - lat);
+    float delta2 = radians(lon2 - lon);
 
     float y = sin(delta2) * cos(teta2);
-    float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
-    float brng = atan2(y,x);
+    float x = cos(teta1) * sin(teta2) - sin(teta1) * cos(teta2) * cos(delta2);
+    float brng = atan2(y, x);
     brng = degrees(brng);
-    brng = ( ((int)brng + 360) % 360 );
+    brng = (((int)brng + 360) % 360);
 
     return brng;
 }
@@ -128,42 +129,33 @@ float Gnss::get_bearing(float lat,float lon,float lat2,float lon2)
 void Gnss::update()
 {
     switch (m_state) {
-        case state::off:
-        {
-            if(m_requested_state > m_state)
-            {
+        case state::off: {
+            if (m_requested_state > m_state) {
                 turn_on_impl();
                 m_state = state::no_fix;
             }
             break;
         }
-        case state::no_fix:
-        {
-            if(m_requested_state < m_state)
-            {
+        case state::no_fix: {
+            if (m_requested_state < m_state) {
                 //turn off
                 turn_off_impl();
                 m_state = state::off;
-            }
-            else if(has_fix_impl())
-            {
+            } else if (has_fix_impl()) {
                 m_state = state::fix;
                 m_initial_fix_received = true;
             }
             break;
         }
-        case state::fix:
-        {
-            if(m_requested_state < m_state)
-            {
+        case state::fix: {
+            if (m_requested_state < m_state) {
                 // turn off
                 turn_off_impl();
                 m_state = state::off;
             }
 
             bool non_valid_data = m_loc.vsat > 10000 && m_loc.usat == 0;
-            if(non_valid_data || m_device_stuck)
-            {
+            if (non_valid_data || m_device_stuck) {
                 turn_off_impl();
                 turn_on_impl();
                 m_state = state::no_fix;

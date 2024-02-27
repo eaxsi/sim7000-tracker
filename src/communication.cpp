@@ -2,7 +2,10 @@
 
 #include "util.h"
 
-Communication::Communication(TinyGsm* modem, TinyGsmClient* client,  Settings* config, MQTT_CALLBACK_SIGNATURE)
+Communication::Communication(TinyGsm* modem,
+                             TinyGsmClient* client,
+                             Settings* config,
+                             MQTT_CALLBACK_SIGNATURE)
 {
     m_modem = modem;
     m_client = client;
@@ -108,12 +111,9 @@ bool Communication::connect_mqtt()
 
     get_topic_name(topic_buf, CONNECTED_TOPIC);
     bool status = m_mqtt.connect(m_nodeId, BROKER_USER, BROKER_PASSWD, topic_buf, 1, true, "0");
-    if(status)
-    {
+    if (status) {
         INFO("MQTT Connect Success");
-    }
-    else
-    {
+    } else {
         ERROR("MQTT Connect fail");
         ERROR(m_mqtt.state());
     }
@@ -131,8 +131,7 @@ bool Communication::connect_mqtt()
 
     // send status messages
     //send_status();
-    if(m_first_connection)
-    {
+    if (m_first_connection) {
         get_topic_name(topic_buf, VERSION_TOPIC);
         m_mqtt.publish(topic_buf, VERSION);
         m_first_connection = false;
@@ -170,8 +169,7 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             uint8_t received_mode = atoi((char*)payload);
             m_config->set_mode((system_mode)received_mode);
             INFO("Changing device mode");
-        }
-        else if(i == 2 && strcmp(pt, "ota") == 0) {
+        } else if (i == 2 && strcmp(pt, "ota") == 0) {
             payload[len] = '\0';
             char wifi_ssid[50] = "";
             char wifi_passwd[50] = "";
@@ -190,7 +188,16 @@ bool Communication::send_location(location_update* l)
 {
     if (connected_to_mqtt_broker()) {
         char str[80];
-        sprintf(str, "%f,%f,%f,%f,%f,%d,%d,%d", l->lat, l->lon, l->speed, l->alt, l->accuracy, l->course, l->vsat, l->usat);
+        sprintf(str,
+                "%f,%f,%f,%f,%f,%d,%d,%d",
+                l->lat,
+                l->lon,
+                l->speed,
+                l->alt,
+                l->accuracy,
+                l->course,
+                l->vsat,
+                l->usat);
         updateValue(LOC_UPDATE_TOPIC, str);
         return true;
     } else {
@@ -238,7 +245,8 @@ uint8_t Communication::get_signal_strength()
 
 void Communication::update()
 {
-    if (util::get_time_diff(m_status_check_timestamp) > 30 * 1000 || m_modem_state != m_requested_modem_state) {
+    if (util::get_time_diff(m_status_check_timestamp) > 30 * 1000
+        || m_modem_state != m_requested_modem_state) {
         INFO("Net check!");
         // diagnose
         if (m_mqtt.connected())
@@ -258,13 +266,10 @@ void Communication::update()
         if (m_modem_state == modem_state::off) {
             if (m_requested_modem_state > m_modem_state) {
                 INFO("Turning modem on");
-                if(m_modem_failed_turn_on_counter < 5)
-                {
+                if (m_modem_failed_turn_on_counter < 5) {
                     turn_modem_on();
                     m_modem_failed_turn_on_counter++;
-                }
-                else
-                {
+                } else {
                     reset_modem();
                     m_modem_failed_turn_on_counter = 0;
                 }
@@ -335,16 +340,13 @@ bool Communication::updateValue(char* topic_name, char* value_buffer)
     return m_mqtt.publish(topic_buffer, value_buffer);
 }
 
-bool Communication::get_ota_wifi_details(wifi_details * ota_wifi)
+bool Communication::get_ota_wifi_details(wifi_details* ota_wifi)
 {
-    if(m_wifi_details.wifi_ssid != "" && m_wifi_details.wifi_passwd != "")
-    {
+    if (m_wifi_details.wifi_ssid != "" && m_wifi_details.wifi_passwd != "") {
         strcpy(ota_wifi->wifi_ssid, m_wifi_details.wifi_ssid);
         strcpy(ota_wifi->wifi_passwd, m_wifi_details.wifi_passwd);
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }

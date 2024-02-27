@@ -6,7 +6,6 @@
 
 #include "common.h"
 
-
 class Gnss
 {
     public:
@@ -26,7 +25,7 @@ class Gnss
         bool has_fix_impl();
         bool turn_on_impl();
         bool turn_off_impl();
-        float get_bearing(float lat,float lon,float lat2,float lon2);
+        float get_bearing(float lat, float lon, float lat2, float lon2);
 
         TinyGsm* m_modem;
         state m_state;

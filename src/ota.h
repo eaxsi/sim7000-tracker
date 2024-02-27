@@ -14,8 +14,9 @@ class Ota
 {
     public:
         Ota();
-        bool try_to_connect_to_wifi(wifi_details *);
+        bool try_to_connect_to_wifi(wifi_details*);
         void start();
+
     private:
         wifi_details m_wifi_details;
 };

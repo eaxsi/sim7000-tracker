@@ -33,21 +33,20 @@ void Battery::update()
     if (util::get_time_diff(m_voltage_measurement_timemstamp) > m_voltage_measurement_interval) {
         int raw_soc = m_soc;
         bool charging = is_charging();
-        if(charging)
-        {
-            if(charging && !m_last_charging_state) // started charging
+        if (charging) {
+            if (charging && !m_last_charging_state) // started charging
             {
                 m_charing_start_soc = m_soc;
                 m_charging_start_time = millis();
-            }
-            else // continue charging
+            } else // continue charging
             {
-                float hours_since_charging_started = (millis()-m_charging_start_time)/3600000.0f;
-                raw_soc = m_charing_start_soc + (100*(hours_since_charging_started * CHARGING_CURRENT) / BATTERY_CAPACITY);
+                float hours_since_charging_started
+                    = (millis() - m_charging_start_time) / 3600000.0f;
+                raw_soc = m_charing_start_soc
+                          + (100 * (hours_since_charging_started * CHARGING_CURRENT)
+                             / BATTERY_CAPACITY);
             }
-        }
-        else
-        {
+        } else {
             m_battery_voltage
                 = 0.1f * get_raw_voltage_from_pin(m_battery_pin) + 0.9f * m_battery_voltage;
             raw_soc = map(m_battery_voltage, 2400, 3560, 0, 100);

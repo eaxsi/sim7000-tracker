@@ -1,10 +1,8 @@
 #include "settings.h"
 
-
 Settings::Settings()
 {
 }
-
 
 system_mode Settings::get_mode()
 {

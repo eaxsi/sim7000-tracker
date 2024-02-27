@@ -52,25 +52,22 @@ void setup()
 {
     Serial.begin(115200);
     WiFi.mode(WIFI_OFF);
-    while(!Serial);
+    while (!Serial)
+        ;
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2023");
 
     // OTA mode
-    if(strlen(ota_wifi_details.wifi_ssid) > 0)
-    {
+    if (strlen(ota_wifi_details.wifi_ssid) > 0) {
         INFO("Staring OTA");
         Ota ota = Ota();
-        if(ota.try_to_connect_to_wifi(&ota_wifi_details))
-        {
+        if (ota.try_to_connect_to_wifi(&ota_wifi_details)) {
             INFO("Connected to OTA wifi");
             delay(100);
-            strcpy(ota_wifi_details.wifi_ssid,"");
-            strcpy(ota_wifi_details.wifi_passwd,"");
+            strcpy(ota_wifi_details.wifi_ssid, "");
+            strcpy(ota_wifi_details.wifi_passwd, "");
             ota.start();
-        }
-        else
-        {	
+        } else {
             device.restart();
         }
     }
@@ -128,7 +125,7 @@ void loop()
                     device.set_wake_up_device(platform::wake_up_device::magnet);
                     INFO("Going to light sleep");
                     Serial.flush();
-                    device.sleep(60*60); // sec <-- should be about 1h
+                    device.sleep(60 * 60); // sec <-- should be about 1h
                     // Woken up here
                     mode_change_timestamp = millis();
                     communications.set_state(Communication::modem_state::mqtt_connected);
@@ -140,25 +137,21 @@ void loop()
             break;
         }
         case system_mode::track: {
-            uint32_t timeout = gnss.has_initial_fix() ? movement_timeout : movement_timeout*10;
-            if (util::get_time_diff(last_movement_timestamp) < timeout || gnss.is_moving() || device.charging()) {
-                if(!communications.connected_to_mqtt_broker())
-                {
+            uint32_t timeout = gnss.has_initial_fix() ? movement_timeout : movement_timeout * 10;
+            if (util::get_time_diff(last_movement_timestamp) < timeout || gnss.is_moving()
+                || device.charging()) {
+                if (!communications.connected_to_mqtt_broker()) {
                     communications.set_state(Communication::modem_state::mqtt_connected);
                 }
-                if(!gnss.is_on() && !communications.modem_is_off())
-                {
+                if (!gnss.is_on() && !communications.modem_is_off()) {
                     gnss.turn_on();
                 }
 
                 else if (!communications.connected_to_mqtt_broker()) {
                     communications.set_state(Communication::modem_state::mqtt_connected);
-                }
-                else
-                {
+                } else {
                     // gnss on and connected
-                    if(gnss.has_fix())
-                    {
+                    if (gnss.has_fix()) {
                         if (util::get_time_diff(last_location_timestamp) > location_min_interval) {
                             // send location here
                             location_update loc;
@@ -167,14 +160,11 @@ void loop()
                             INFO("POSITION SENT!");
                             last_location_timestamp = millis();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         INFO("Waiting for GNSS fix");
                     }
                 }
-            }
-            else //kulunut liikaa aikaa
+            } else //kulunut liikaa aikaa
             {
                 gnss.turn_off();
                 communications.set_state(Communication::modem_state::off);
@@ -184,7 +174,7 @@ void loop()
                     device.set_wake_up_device(platform::wake_up_device::movement);
                     device.sleep();
                     INFO("Woken up from sleep");
-                    
+
                     // here when woken up by movement
                     last_movement_timestamp = millis();
                     communications.set_state(Communication::modem_state::mqtt_connected);
@@ -194,9 +184,7 @@ void loop()
             break;
         }
         case system_mode::ota: {
-
-            if(communications.get_ota_wifi_details(&ota_wifi_details))
-            {
+            if (communications.get_ota_wifi_details(&ota_wifi_details)) {
                 INFO("Wifi details copied from communication");
                 INFO(ota_wifi_details.wifi_ssid);
                 device.deep_sleep(1);
@@ -215,20 +203,16 @@ void loop()
         default: break;
     }
 
-    if(communications.connected_to_mqtt_broker())
-    {
-        if(util::get_time_diff(last_status_timestamp) > status_interval)
-        {
+    if (communications.connected_to_mqtt_broker()) {
+        if (util::get_time_diff(last_status_timestamp) > status_interval) {
             communications.send_status(device.get_soc(), device.charging());
             last_status_timestamp = millis();
         }
-        if(util::get_time_diff(last_setting_request_timestamp) > setting_request_interval)
-        {
+        if (util::get_time_diff(last_setting_request_timestamp) > setting_request_interval) {
             communications.request_settings();
             last_setting_request_timestamp = millis();
         }
     }
-
 
     // Updates
     communications.update();

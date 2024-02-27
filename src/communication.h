@@ -30,7 +30,10 @@ class Communication
             mqtt_connected
         };
 
-        Communication(TinyGsm* modem, TinyGsmClient* client, Settings* config, MQTT_CALLBACK_SIGNATURE);
+        Communication(TinyGsm* modem,
+                      TinyGsmClient* client,
+                      Settings* config,
+                      MQTT_CALLBACK_SIGNATURE);
         bool init();
         void update();
 
@@ -42,7 +45,7 @@ class Communication
         bool send_location(location_update* loc);
         bool send_status(uint8_t soc, bool charging);
         bool request_settings();
-        bool get_ota_wifi_details(wifi_details *);
+        bool get_ota_wifi_details(wifi_details*);
         bool send_ota_status(String status);
         void reset_modem();
 
