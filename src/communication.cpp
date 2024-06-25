@@ -166,8 +166,24 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             return;
         else if (i == 2 && strcmp(pt, "settings") == 0) {
             payload[len] = '\0';
-            uint8_t received_mode = atoi((char*)payload);
+            String message = String((char*)payload);
+
+            // Find the index of the first comma
+            int commaIndex = message.indexOf(',');
+            if (commaIndex == -1) {
+                ERROR("Invalid payload format");
+                return;
+            }
+
+            String modeStr = message.substring(0, commaIndex);
+            String settingStr = message.substring(commaIndex + 1);
+
+            // Convert the substrings to appropriate types
+            uint8_t received_mode = modeStr.toInt();
+            uint32_t received_periocid_tracking_interval = settingStr.toInt();
+
             m_config->set_mode((system_mode)received_mode);
+            m_config->set_periodic_tracking_interval(received_periocid_tracking_interval);
             INFO("Changing device mode");
         } else if (i == 2 && strcmp(pt, "ota") == 0) {
             payload[len] = '\0';
@@ -232,7 +248,7 @@ bool Communication::send_ota_status(String status)
 bool Communication::request_settings()
 {
     if (connected_to_mqtt_broker()) {
-        return updateValue(SETTINGS_REQUEST_TOPIC, "1");
+        return updateValue(SETTINGS_REQUEST_TOPIC, "2");
     } else {
         return false;
     }

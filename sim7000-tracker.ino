@@ -43,6 +43,8 @@ static uint32_t location_min_interval = 10 * 1000; //ms
 static uint32_t status_interval = 90 * 1000;
 static uint32_t setting_request_interval = 5 * 60 * 1000;
 
+bool periodic_position_sent = false;
+
 void callback_helper(char* topic, byte* payload, unsigned int len)
 {
     communications.mqtt_callback(topic, payload, len);
@@ -197,6 +199,48 @@ void loop()
             // stay connected, idle
             if (!communications.connected_to_mqtt_broker()) {
                 communications.set_state(Communication::modem_state::mqtt_connected);
+            }
+            break;
+        }
+        case system_mode::periodic_tracking: {
+            if(!periodic_position_sent && util::get_time_diff(last_location_timestamp) < (5*60*1000))
+            {
+                if (!gnss.is_on() && !communications.modem_is_off()) {
+                    gnss.turn_on();
+                }
+                if(!communications.connected_to_mqtt_broker())
+                {
+                    communications.set_state(Communication::modem_state::mqtt_connected);
+                }
+                if(gnss.has_fix() && communications.connected_to_mqtt_broker())
+                {
+                    INFO("Sending periodic location");
+                    location_update loc;
+                    gnss.get_location(&loc);
+                    communications.send_location(&loc);
+                    periodic_position_sent = true;
+                }
+            }
+            else
+            {
+                if(gnss.is_on())
+                {
+                    gnss.turn_off();
+                }
+                if(!communications.modem_is_off())
+                {
+                    communications.set_state(Communication::modem_state::off);
+                }
+                if(!gnss.is_on() && communications.modem_is_off())
+                {
+                    device.set_wake_up_device(platform::wake_up_device::magnet);
+                    INFO("Going to light sleep");
+                    Serial.flush();
+                    device.sleep(config.get_periodic_tracking_interval());
+                    INFO("Woken up");
+                    periodic_position_sent = false; // reset
+                    last_location_timestamp = millis();
+                }
             }
             break;
         }

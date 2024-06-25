@@ -95,13 +95,15 @@ Example message: ```60.169900,24.938400,0.000000,14.500000,1.800000,194,23,4```
 - 4 satellites used
 
 ## Settings
-The device listens to the MQTT broker for settings which in this case is the system mode.
+The device listens to the MQTT broker for settings which in this case is the system mode and periodic track interval.
+The periodic track interval is sent always but it will be applied only when the periodic track -mode is activated. The setting unit is seconds.
 The tracker has the following working modes:
 - 0: Hibernate, wake up only with magnet
 - 1: Sleep, Go online every 60 minutes, also wake up by magnet
 - 2: Track, Send device position if device sensed movement
 - ~~3: OTA, update device firmware via wifi~~(Entered by giving OTA wifi details)
 - 4: Idle, stay connected to the MQTT Broker
+- 5: Periodic track, send position on set time interval
 
 
 # Extras
