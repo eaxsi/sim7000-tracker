@@ -174,7 +174,7 @@ void loop()
                     INFO("Going to sleep");
                     Serial.flush();
                     device.set_wake_up_device(platform::wake_up_device::movement);
-                    device.sleep();
+                    device.sleep(24*60*60); // 24h
                     INFO("Woken up from sleep");
 
                     // here when woken up by movement
