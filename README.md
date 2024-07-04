@@ -23,6 +23,7 @@ This project depends on the following Arduino libraries. These libraries can be 
 This project also depends on the ESP32 board configurations in the Arduino IDE. They can be installed by adding an additional board manager URL. Go to File --> Preferences in the Arduino IDE and add the following URL to the additional boards manager URLs field:
 ```https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json```
 
+Board setting: ESP32 Dev Module
 
 # Config file
 Edit the config.h file
