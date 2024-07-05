@@ -1,5 +1,7 @@
 #include "platform.h"
 
+#define uS_TO_S_FACTOR 1000000LL  /* Conversion factor for micro seconds to seconds */
+
 platform::platform()
 {
     pinMode(REED_PIN, INPUT_PULLUP);
@@ -75,7 +77,8 @@ void platform::sleep()
 
 void platform::sleep(uint32_t timeout)
 {
-    esp_sleep_enable_timer_wakeup(timeout * 1000 * 1000);
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+    esp_sleep_enable_timer_wakeup(uint64_t(timeout) * uS_TO_S_FACTOR);
     sleep();
 }
 
