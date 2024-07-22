@@ -154,17 +154,20 @@ def print_status(devices: Device_updating_process):
     else:
         os.system('clear')
     
-    print("Tracker OTA helper v{}".format(__version__))
-    print("MQTT connection: {}".format(client.is_connected()))
-    print(" Device ID | Status | Version | Seconds since last message")
+    print(f"Sim7000-tracker OTA helper v{__version__}")
+    print(f"MQTT connection: {client.is_connected()}")
+    print(f"{'Device ID':<12} | {'Status':<25} | {'Version':<10} | {'Seconds since last message':<25}")
+
     for d in devices:
-        time_str = None
-        if(d.last_msg_timestamp):
+        time_str = "N/A"
+        if d.last_msg_timestamp:
             now = datetime.datetime.now()
             delta = now - d.last_msg_timestamp
             time_str = int(delta.total_seconds())
-
-        print("{}|{}|{}|{}".format(d.id, d.state, d.version, time_str))
+        
+        version_str = d.version if d.version is not None else "N/A"
+        
+        print(f"{d.id:<12} | {d.state:<25} | {version_str:<10} | {time_str:<25}")
 
 def main():
     try:
