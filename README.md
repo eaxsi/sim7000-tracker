@@ -10,20 +10,24 @@ The tracker sends location info from the device to a MQTT broker via LTE connect
 
 A 3D-printable case can be found from [Printables.com: LilyGO T-SIM7000G case](https://www.printables.com/model/768589-lilygo-t-sim7000g-case)
 
-
  ![Picture of modded board](/doc/modified_lilygo_t-sim7000g.jpeg)
 
+# Compilation requirements
+- **Arduino IDE:** version v2.3.0 or above
+    - Version v2.3.0 or above from [official Arduino website](https://www.arduino.cc/en/software)
+- **ESP32 bord configurations**
+    - Add ESP32 boards to Arduino IDE board manager by adding link to additional board configurations.
+        - Add ```https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json``` to File --> Preferences --> additional boards manager URLs field in the Arduino IDE
+    - Install ESP32 boards from the bord manager
+        - Go to Tools -> Board -> Boards Manager and seach and install "**esp32**" by Espressif Systems
+- **External libraries**, this project relies on two external libraries that can be installed from the Arduino IDE library manager: Sketch -> Include Library -> Manage Libraries, search and install the following
+    - [TinyGSM](https://github.com/vshymanskyy/TinyGSM) (v0.11.7)by Volodymyr Shymanskyy
+    - [PubSubClient](https://github.com/knolleary/pubsubclient)(v2.8) by Nick O'Leary
+  
 # Compilation
-This project has been made to work with the Arduino IDE environment. The recommended Arduino IDE version is v2.3.0 and above.
-
-This project depends on the following Arduino libraries. These libraries can be installed from the Arduino IDE: Sketch --> Include libraries --> Manage libraries
-- [TinyGSM](https://github.com/vshymanskyy/TinyGSM) (v0.11.7)by Volodymyr Shymanskyy
-- [PubSubClient](https://github.com/knolleary/pubsubclient)(v2.8) by Nick O'Leary
-
-This project also depends on the ESP32 board configurations in the Arduino IDE. They can be installed by adding an additional board manager URL. Go to File --> Preferences in the Arduino IDE and add the following URL to the additional boards manager URLs field:
-```https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json```
-
-Board setting: ESP32 Dev Module
+- Edit configuration file
+- Change boad setting from Arduino IDE by going Tools -> Board and select **ESP32 Dev Module**
+- Compile the software!
 
 # Config file
 Edit the config.h file
@@ -42,9 +46,8 @@ Edit the config.h file
 #define HTTP_OTA_URL "" // Address to the the OTA-update file
 ```
 
-
 # Communication
-The tracker communicates using the MQTT protocol, which is a publish/subscribe -type protocol. 
+The tracker communicates using the MQTT protocol, which is a publish/subscribe -type protocol.
 
 The tracker also uses HTTP for OTA-update downloading.
 
@@ -54,7 +57,7 @@ Tracker ID id an unique 7-numbered identifier for the tracker. It is made from t
 ## Connecting
 When the tracker connects to the tracker it updates the connected topic to 1. If the tracker connects to the broker for the first time after boot, it sends the installed software version.
 
-## Status
+## Status message
 The tracker periodically sends a status message that contains the battery state of charge(SOC), cellular signal strength and charging status. These values are sent as a comma separated string.
 
 | Order in message | Data                     | Datatype | Unit |
@@ -68,8 +71,7 @@ Example message: ```55,90,0```
 - Cellular signal strength 90%
 - Charger not connected
 
-
-## Location
+## Location message
 Location update contains the following fields: Latitude, Longitude, Speed, Altitude, Accuracy, Course, Visible satellites, Used satellites
 Latitude and longitude are degrees and in decimal format. 
 The data is comma separated in the message.
@@ -95,7 +97,7 @@ Example message: ```60.169900,24.938400,0.000000,14.500000,1.800000,194,23,4```
 - 23 visible satellites
 - 4 satellites used
 
-## Settings
+## Settings message
 The device listens to the MQTT broker for settings which in this case is the system mode and periodic track interval.
 The periodic track interval is sent always but it will be applied only when the periodic track -mode is activated. The setting unit is seconds.
 The tracker has the following working modes:
