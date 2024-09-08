@@ -1,10 +1,10 @@
 #include "ota.h"
 
-Ota::Ota()
+ota::ota()
 {
 }
 
-bool Ota::try_to_connect_to_wifi(wifi_details* ota_wifi)
+bool ota::try_to_connect_to_wifi(wifi_details* ota_wifi)
 {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ota_wifi->wifi_ssid, ota_wifi->wifi_passwd);
@@ -18,8 +18,9 @@ bool Ota::try_to_connect_to_wifi(wifi_details* ota_wifi)
     return (WiFi.status() == WL_CONNECTED);
 }
 
-void Ota::start()
+ota::status ota::start()
 {
+    status ota_status = status::none;
     WiFiClient updater_client;
     updater_client.setTimeout(12000);
 
@@ -30,11 +31,19 @@ void Ota::start()
             Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s\n",
                           httpUpdate.getLastError(),
                           httpUpdate.getLastErrorString().c_str());
+            ota_status = status::ota_error;
             break;
 
-        case HTTP_UPDATE_NO_UPDATES: Serial.println("HTTP_UPDATE_NO_UPDATES"); break;
+        case HTTP_UPDATE_NO_UPDATES:
+            INFO("HTTP_UPDATE_NO_UPDATES");
+            ota_status = status::ota_fail;
+            break;
 
-        case HTTP_UPDATE_OK: Serial.println("HTTP_UPDATE_OK"); break;
+        case HTTP_UPDATE_OK:
+            INFO("HTTP_UPDATE_OK");
+            ota_status = status::success;
+            break;
     }
     WiFi.disconnect();
+    return ota_status;
 }

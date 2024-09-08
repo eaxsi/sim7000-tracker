@@ -13,6 +13,7 @@
 #include "log.h"
 #include "mqtt_topics.h"
 #include "settings.h"
+#include "ota.h"
 
 #define MQTT_VERSION MQTT_VERSION_3_1
 #define TINY_GSM_USE_GPRS true
@@ -34,7 +35,7 @@ class Communication
                       TinyGsmClient* client,
                       Settings* config,
                       MQTT_CALLBACK_SIGNATURE);
-        bool init();
+        bool init(ota::status);
         void update();
 
         void set_state(modem_state);
@@ -46,7 +47,7 @@ class Communication
         bool send_status(uint8_t soc, bool charging);
         bool request_settings();
         bool get_ota_wifi_details(wifi_details*);
-        bool send_ota_status(String status);
+        bool send_ota_status(ota::status status);
         void reset_modem();
 
     private:
@@ -65,6 +66,7 @@ class Communication
         Settings* m_config;
 
         uint8_t m_error;
+        ota::status m_ota_status;
         char m_nodeId[8] = "";
 
         uint32_t m_status_check_timestamp = 0;

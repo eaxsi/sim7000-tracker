@@ -20,7 +20,7 @@ Communication::Communication(TinyGsm* modem,
     digitalWrite(MODEM_RESET_PIN, LOW);
 }
 
-bool Communication::init()
+bool Communication::init(ota::status ota_status)
 {
     // init modem
     MODEM_SERIAL.begin(MODEM_BAUDRATE, SERIAL_8N1, MODEM_SERIAL_RX_PIN, MODEM_SERIAL_TX_PIN);
@@ -45,6 +45,7 @@ bool Communication::init()
     INFO_VALUE("Node ID: ", m_nodeId);
 
     m_mqtt.setServer(BROKER_HOST, BROKER_PORT);
+    m_ota_status = ota_status;
 
     uint8_t sim_status = m_modem->getSimStatus();
     if (sim_status == SIM_LOCKED) {
@@ -134,6 +135,13 @@ bool Communication::connect_mqtt()
     if (m_first_connection) {
         get_topic_name(topic_buf, VERSION_TOPIC);
         m_mqtt.publish(topic_buf, VERSION);
+        if(m_ota_status != ota::status::none)
+        {
+            INFO_VALUE("Ota status: ", m_ota_status);
+            Serial.println(m_ota_status);
+            send_ota_status(m_ota_status);
+        }
+        
         m_first_connection = false;
     }
 
@@ -233,16 +241,11 @@ bool Communication::send_status(uint8_t soc, bool charging)
     }
 }
 
-bool Communication::send_ota_status(String status)
+bool Communication::send_ota_status(ota::status status)
 {
-    if (connected_to_mqtt_broker()) {
-        char str[80];
-        status.toCharArray(str, 80);
-        updateValue(OTA_STATUS_TOPIC, str);
-        return true;
-    } else {
-        return false;
-    }
+    char str[10];
+    sprintf(str, "%d", status);
+    return updateValue(OTA_STATUS_TOPIC, str);
 }
 
 bool Communication::request_settings()

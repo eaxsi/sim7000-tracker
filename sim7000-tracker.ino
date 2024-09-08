@@ -26,6 +26,7 @@ void callback_helper(char* topic, byte* payload, unsigned int len);
 // store system state in RTC memory so that it will be remembered through out sleep
 RTC_DATA_ATTR uint16_t bootcount = 0;
 RTC_DATA_ATTR wifi_details ota_wifi_details;
+RTC_DATA_ATTR ota::status ota_status = ota::status::none;
 Settings config = Settings();
 platform device = platform();
 Gnss gnss = Gnss(&modem);
@@ -62,16 +63,18 @@ void setup()
     // OTA mode
     if (strlen(ota_wifi_details.wifi_ssid) > 0) {
         INFO("Staring OTA");
-        Ota ota = Ota();
-        if (ota.try_to_connect_to_wifi(&ota_wifi_details)) {
+        ota ota_updater = ota();
+        if (ota_updater.try_to_connect_to_wifi(&ota_wifi_details)) {
             INFO("Connected to OTA wifi");
             delay(100);
-            strcpy(ota_wifi_details.wifi_ssid, "");
-            strcpy(ota_wifi_details.wifi_passwd, "");
-            ota.start();
+            ota_status = ota_updater.start();
         } else {
-            device.restart();
+            ota_status = ota::status::wifi_failed;
+            ERROR("Failed to connect to wifi");
         }
+        strcpy(ota_wifi_details.wifi_ssid, "");
+        strcpy(ota_wifi_details.wifi_passwd, "");
+        device.restart();
     }
 
     config.set_mode(system_mode::sleep);
@@ -80,7 +83,8 @@ void setup()
     if (bootcount != 0) {
         INFO("Woken up from deep sleep");
     }
-    communications.init();
+    communications.init(ota_status);
+    ota_status = ota::status::none;
     bootcount++;
     mode_change_timestamp = millis();
 }

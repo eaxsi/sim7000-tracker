@@ -95,7 +95,8 @@ void platform::deep_sleep(uint32_t timeout)
 
 void platform::restart()
 {
-    ESP.restart();
+    delay(100); // finish sending serial data
+    deep_sleep(1); // program starts from the beginning but RTC memory is not erased
 }
 
 uint8_t platform::get_soc()

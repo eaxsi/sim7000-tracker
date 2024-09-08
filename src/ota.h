@@ -10,12 +10,13 @@
 #include "log.h"
 #include "util.h"
 
-class Ota
+class ota
 {
     public:
-        Ota();
+        enum status { none, wifi_failed, ota_fail, ota_error, success };
+        ota();
         bool try_to_connect_to_wifi(wifi_details*);
-        void start();
+        status start();
 
     private:
         wifi_details m_wifi_details;
