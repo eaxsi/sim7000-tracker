@@ -71,7 +71,9 @@ void platform::set_wake_up_device(platform::wake_up_device wake_up_device)
 void platform::sleep()
 {
     m_led.turn_off();
+    vTaskSuspendAll();
     esp_light_sleep_start();
+    xTaskResumeAll();
     m_led.turn_on();
 }
 
@@ -84,6 +86,7 @@ void platform::sleep(uint32_t timeout)
 
 void platform::deep_sleep()
 {
+    vTaskSuspendAll();
     esp_deep_sleep_start();
 }
 
@@ -137,7 +140,6 @@ void platform::update()
         m_blink_duty_cycle = 10;
     }
 
-    led_blink_update();
     m_vibration_sensor.update();
     m_battery.update();
 }

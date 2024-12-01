@@ -76,6 +76,14 @@ void setup()
         strcpy(ota_wifi_details.wifi_passwd, "");
         device.restart();
     }
+    xTaskCreate(
+        blinkTask,       // Task function
+        "Blink Task",    // Name of the task (for debugging)
+        1000,            // Stack size (in words, not bytes)
+        NULL,            // Task input parameter
+        2,               // Priority of the task
+        NULL             // Task handle
+    );
 
     config.set_mode(system_mode::sleep);
     last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
@@ -83,10 +91,18 @@ void setup()
     if (bootcount != 0) {
         INFO("Woken up from deep sleep");
     }
+    device.update();
     communications.init(ota_status);
     ota_status = ota::status::none;
     bootcount++;
     mode_change_timestamp = millis();
+}
+
+void blinkTask(void * parameter) {
+  for (;;) {
+    device.led_blink_update();
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
 }
 
 void loop()

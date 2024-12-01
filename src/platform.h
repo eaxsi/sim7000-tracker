@@ -42,6 +42,7 @@ class platform
         void deep_sleep(uint32_t timeout); // in s
         void restart();
         bool charging();
+        void led_blink_update();
 
         void update();
 
@@ -57,5 +58,4 @@ class platform
         Led m_led = Led(LED_PIN, true);
         Battery m_battery = Battery(V_BATT_PIN);
 
-        void led_blink_update();
 };
