@@ -21,6 +21,7 @@ class Battery
         uint32_t m_voltage_measurement_timemstamp;
         uint32_t m_voltage_measurement_interval = 1000; //ms
         uint8_t m_soc;
+        bool m_charging;
         bool m_last_charging_state;
         uint8_t m_charing_start_soc;
         uint32_t m_charging_start_time;

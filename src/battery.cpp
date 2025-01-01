@@ -20,7 +20,7 @@ float Battery::get_voltage()
 
 bool Battery::is_charging()
 {
-    return get_raw_voltage_from_pin(m_battery_pin) < 2000;
+    return m_charging;
 }
 
 float Battery::get_raw_voltage_from_pin(uint8_t pin)
@@ -31,28 +31,32 @@ float Battery::get_raw_voltage_from_pin(uint8_t pin)
 void Battery::update()
 {
     if (util::get_time_diff(m_voltage_measurement_timemstamp) > m_voltage_measurement_interval) {
+        float raw_voltage = get_raw_voltage_from_pin(m_battery_pin);
         int raw_soc = m_soc;
-        bool charging = is_charging();
-        if (charging) {
-            if (charging && !m_last_charging_state) // started charging
+        m_charging = raw_voltage < 2000;
+        if(m_charging) {
+            if (!m_last_charging_state) // started charging
             {
                 m_charing_start_soc = m_soc;
                 m_charging_start_time = millis();
-            } else // continue charging
+            } else
             {
                 float hours_since_charging_started
                     = (millis() - m_charging_start_time) / 3600000.0f;
-                raw_soc = m_charing_start_soc
-                          + (100 * (hours_since_charging_started * CHARGING_CURRENT)
-                             / BATTERY_CAPACITY);
+                    raw_soc = m_charing_start_soc
+                    + (100 * (hours_since_charging_started * CHARGING_CURRENT)
+                    / BATTERY_CAPACITY);
             }
-        } else {
+        }
+        else
+        {
             m_battery_voltage
-                = 0.1f * get_raw_voltage_from_pin(m_battery_pin) + 0.9f * m_battery_voltage;
+                = 0.1f * raw_voltage + 0.9f * m_battery_voltage; // IIR filter
             raw_soc = map(m_battery_voltage, 2400, 3560, 0, 100);
         }
+
         m_soc = (uint8_t)constrain(raw_soc, 0, 100);
-        m_last_charging_state = charging;
+        m_last_charging_state = m_charging;
         m_voltage_measurement_timemstamp = millis();
     }
 }
