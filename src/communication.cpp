@@ -25,9 +25,13 @@ bool Communication::init(ota::status ota_status)
     // init modem
     MODEM_SERIAL.begin(MODEM_BAUDRATE, SERIAL_8N1, MODEM_SERIAL_RX_PIN, MODEM_SERIAL_TX_PIN);
     MODEM_SERIAL.flush();
-    m_modem->restart();
-    delay(1000);
-    while (!m_modem->testAT(1000)) {
+    if(m_modem->testAT(200))
+    {
+        m_modem->restart();
+        delay(1000);
+    }
+
+    while (!m_modem->testAT(200)) {
         INFO("...");
         delay(1000);
     }
