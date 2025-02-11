@@ -58,7 +58,7 @@ void setup()
     while (!Serial)
         ;
     delay(1000);
-    INFO("SIM7000-tracker, Eero Silfverberg, 2023");
+    INFO("SIM7000-tracker, Eero Silfverberg, 2025");
 
     // OTA mode
     if (strlen(ota_wifi_details.wifi_ssid) > 0) {
