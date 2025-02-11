@@ -61,6 +61,8 @@ bool Communication::init(ota::status ota_status)
         ERROR("SIM-card missing!");
         return false;
     }
+    m_modem->setNetworkMode(38); //  2 = auto, 13=GSM, 38=LTE, 51=LTE+GSM
+    m_modem->setPreferredMode(1); // 1=LTE-M, 2=NB-IoT, 3=LTE-M and NB-IoT
 
     return true;
 }
