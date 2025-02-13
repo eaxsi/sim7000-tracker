@@ -23,6 +23,7 @@ ota::status ota::start()
     status ota_status = status::none;
     WiFiClient updater_client;
     updater_client.setTimeout(12000);
+    httpUpdate.setLedPin(LED_PIN, LOW);
 
     t_httpUpdate_return ret = httpUpdate.update(updater_client, HTTP_OTA_URL);
 
