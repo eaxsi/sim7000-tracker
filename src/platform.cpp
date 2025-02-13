@@ -86,7 +86,6 @@ void platform::sleep(uint32_t timeout)
 
 void platform::deep_sleep()
 {
-    vTaskSuspendAll();
     esp_deep_sleep_start();
 }
 
