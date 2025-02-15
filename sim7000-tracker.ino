@@ -159,7 +159,7 @@ void loop()
             break;
         }
         case system_mode::track: {
-            uint32_t timeout = gnss.has_initial_fix() ? movement_timeout : movement_timeout * 10;
+            uint32_t timeout = gnss.has_initial_fix() ? movement_timeout : movement_timeout * 5.0;
             if (util::get_time_diff(last_movement_timestamp) < timeout || gnss.is_moving()
                 || device.charging()) {
                 if (!communications.connected_to_mqtt_broker()) {
