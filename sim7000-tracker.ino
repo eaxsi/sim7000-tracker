@@ -268,7 +268,7 @@ void loop()
     }
 
     if (communications.connected_to_mqtt_broker()) {
-        if (util::get_time_diff(last_status_timestamp) > status_interval) {
+        if (util::get_time_diff(last_status_timestamp) > status_interval || event == platform::event::charger_plugged || event == platform::event::charger_unplugged) {
             communications.send_status(device.get_soc(), device.charging());
             last_status_timestamp = millis();
         }
