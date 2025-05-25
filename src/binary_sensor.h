@@ -4,12 +4,14 @@
 
 #include "hardware_configuration.h"
 
-class vibration_sensor
+class Binary_sensor
 {
     public:
-        vibration_sensor(uint8_t pin);
+        Binary_sensor(uint8_t pin);
         void update();
         bool activated();
+        bool onChange();
+        bool onRisingEdge();
         bool get_state();
 
     private:

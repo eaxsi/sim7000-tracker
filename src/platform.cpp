@@ -13,20 +13,17 @@ platform::platform()
 platform::event platform::get_event()
 {
     m_oldpinstates = m_pinstates;
-
-    m_pinstates.magnet = digitalRead(REED_PIN);
     m_pinstates.charger = m_battery.is_charging();
 
-    if (m_vibration_sensor.activated()) {
+    if (m_vibration_sensor.onChange()) {
         return event::movement;
-    } else if (!m_pinstates.magnet && m_pinstates.magnet != m_oldpinstates.magnet) {
+    } else if (m_reed_sensor.onRisingEdge()) {
         m_sensor_hold_timestamp = millis();
         m_led.turn_on();
 
-        while (!m_pinstates.magnet && m_pinstates.magnet != m_oldpinstates.magnet
-               && !m_vibration_sensor.activated()) // while reed sensor is activated
+        while (m_reed_sensor.get_state() == false && !m_vibration_sensor.onChange()) // while reed sensor is activated
         {
-            m_pinstates.magnet = digitalRead(REED_PIN);
+            m_reed_sensor.update();
             m_vibration_sensor.update();
             if (util::get_time_diff(m_sensor_hold_timestamp) > 10 * 1000) {
                 m_led.turn_off();
@@ -128,7 +125,12 @@ void platform::led_blink_update()
 
 void platform::update()
 {
-    if (m_battery.is_charging()) {
+    // Led duty cycle
+    if(m_reed_sensor.get_state() == 0) // If magnet sensor activated
+    {
+        m_blink_duty_cycle = 100;
+    }
+    else if (m_battery.is_charging()) {
         if (m_battery.get_soc() == 100)
             m_blink_duty_cycle = 100;
         else
@@ -140,5 +142,6 @@ void platform::update()
     }
 
     m_vibration_sensor.update();
+    m_reed_sensor.update();
     m_battery.update();
 }

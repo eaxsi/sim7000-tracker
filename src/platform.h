@@ -8,7 +8,7 @@
 #include "led.h"
 #include "log.h"
 #include "util.h"
-#include "vibration_sensor.h"
+#include "binary_sensor.h"
 
 class platform
 {
@@ -54,7 +54,8 @@ class platform
         uint8_t m_blink_duty_cycle; // %
         uint32_t m_sensor_hold_timestamp;
 
-        vibration_sensor m_vibration_sensor = vibration_sensor(ACC_SENSOR_PIN);
+        Binary_sensor m_vibration_sensor = Binary_sensor(ACC_SENSOR_PIN);
+        Binary_sensor m_reed_sensor = Binary_sensor(REED_PIN);
         Led m_led = Led(LED_PIN, true);
         Battery m_battery = Battery(V_BATT_PIN);
 
