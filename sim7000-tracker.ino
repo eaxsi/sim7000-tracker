@@ -35,14 +35,15 @@ Communication communications = Communication(&modem, &client, &config, callback_
 uint32_t mode_change_timestamp;
 uint32_t last_location_timestamp;
 uint32_t last_movement_timestamp;
-uint32_t last_status_timestamp;
-uint32_t last_setting_request_timestamp;
 
 static uint32_t time_to_sleep = 60 * 1000; //ms
 static uint32_t movement_timeout = 1 * 60 * 1000; //ms
 static uint32_t location_min_interval = 10 * 1000; //ms
 static uint32_t status_interval = 90 * 1000;
 static uint32_t setting_request_interval = 5 * 60 * 1000;
+
+uint32_t last_status_timestamp = -status_interval;
+uint32_t last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
 
 bool periodic_position_sent = false;
 
@@ -86,7 +87,6 @@ void setup()
     );
 
     config.set_mode(system_mode::sleep);
-    last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
 
     if (bootcount != 0) {
         INFO("Woken up from deep sleep");
