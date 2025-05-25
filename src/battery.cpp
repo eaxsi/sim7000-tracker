@@ -10,7 +10,14 @@ Battery::Battery(uint8_t battery_pin)
 
 uint8_t Battery::get_soc()
 {
-    return m_soc;
+    if(m_has_measured_battery_voltage)
+    {
+        return m_soc;
+    }
+    else
+    {
+        return -1; // 255
+    }
 }
 
 float Battery::get_voltage()
@@ -50,8 +57,16 @@ void Battery::update()
         }
         else
         {
-            m_battery_voltage
+            m_has_measured_battery_voltage = true;
+            if(m_last_charging_state) // chargin has stopped
+            {
+                m_battery_voltage = raw_voltage;
+            }
+            else
+            {
+                m_battery_voltage
                 = 0.1f * raw_voltage + 0.9f * m_battery_voltage; // IIR filter
+            }
             raw_soc = map(m_battery_voltage, 2400, 3560, 0, 100);
         }
 

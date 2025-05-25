@@ -25,4 +25,5 @@ class Battery
         bool m_last_charging_state;
         uint8_t m_charing_start_soc;
         uint32_t m_charging_start_time;
+        bool m_has_measured_battery_voltage;
 };
