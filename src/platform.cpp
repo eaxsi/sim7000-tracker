@@ -113,34 +113,18 @@ bool platform::charging()
     return m_battery.is_charging();
 }
 
-void platform::led_blink_update()
+void platform::turn_off_led()
 {
-    uint8_t place_in_duty_cycle = (millis() % m_led_blink_interval) * 100 / m_led_blink_interval;
-    if (place_in_duty_cycle > m_blink_duty_cycle && m_led.get()) {
-        m_led.turn_off();
-    } else if (place_in_duty_cycle < m_blink_duty_cycle && !m_led.get()) {
-        m_led.turn_on();
-    }
+    m_led.turn_off();
+}
+
+void platform::turn_on_led()
+{
+    m_led.turn_on();
 }
 
 void platform::update()
 {
-    // Led duty cycle
-    if(m_reed_sensor.get_state() == 0) // If magnet sensor activated
-    {
-        m_blink_duty_cycle = 100;
-    }
-    else if (m_battery.is_charging()) {
-        if (m_battery.get_soc() == 100)
-            m_blink_duty_cycle = 100;
-        else
-            m_blink_duty_cycle = 50;
-
-        //m_blink_duty_cycle = m_battery.get_soc() == 100 ? 100 : 50;
-    } else {
-        m_blink_duty_cycle = 10;
-    }
-
     m_vibration_sensor.update();
     m_reed_sensor.update();
     m_battery.update();

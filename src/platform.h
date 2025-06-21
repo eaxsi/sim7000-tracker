@@ -42,16 +42,14 @@ class platform
         void deep_sleep(uint32_t timeout); // in s
         void restart();
         bool charging();
-        void led_blink_update();
-
+        void turn_off_led();
+        void turn_on_led();
         void update();
 
     private:
         uint16_t m_update_interval;
         pinstates m_pinstates;
         pinstates m_oldpinstates;
-        uint32_t m_led_blink_interval = 2000; //ms
-        uint8_t m_blink_duty_cycle; // %
         uint32_t m_sensor_hold_timestamp;
 
         Binary_sensor m_vibration_sensor = Binary_sensor(ACC_SENSOR_PIN);

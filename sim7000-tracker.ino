@@ -16,6 +16,7 @@
 #include "src/ota.h"
 #include "src/platform.h"
 #include "src/settings.h"
+#include "src/ui.h"
 #include "src/util.h"
 
 TinyGsm modem = TinyGsm(MODEM_SERIAL);
@@ -29,6 +30,7 @@ RTC_DATA_ATTR wifi_details ota_wifi_details;
 RTC_DATA_ATTR ota::status ota_status = ota::status::none;
 Settings config = Settings();
 platform device = platform();
+Ui ui = Ui(&device);
 Gnss gnss = Gnss(&modem);
 Communication communications = Communication(&modem, &client, &config, callback_helper);
 
@@ -78,8 +80,8 @@ void setup()
         device.restart();
     }
     xTaskCreate(
-        blinkTask,       // Task function
-        "Blink Task",    // Name of the task (for debugging)
+        UiTask,       // Task function
+        "Ui Task",    // Name of the task (for debugging)
         1000,            // Stack size (in words, not bytes)
         NULL,            // Task input parameter
         2,               // Priority of the task
@@ -98,11 +100,8 @@ void setup()
     mode_change_timestamp = millis();
 }
 
-void blinkTask(void * parameter) {
-  for (;;) {
-    device.led_blink_update();
-    vTaskDelay(50 / portTICK_PERIOD_MS);
-  }
+void UiTask(void * parameter) {
+    ui.Ui_task();
 }
 
 void loop()
@@ -265,6 +264,24 @@ void loop()
             break;
         }
         default: break;
+    }
+    
+    // UI states
+    if(device.charging() && device.get_soc() == 100)
+    {
+        ui.set_state(Ui::state::full_on);
+    }
+    else if(device.charging())
+    {
+        ui.set_state(Ui::state::half_blink);
+    }
+    else if(gnss.has_fix())
+    {
+        ui.set_state(Ui::state::two_blinks);
+    }
+    else
+    {
+        ui.set_state(Ui::state::single_blink);
     }
 
     if (communications.connected_to_mqtt_broker()) {
