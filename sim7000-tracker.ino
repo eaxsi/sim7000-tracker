@@ -129,13 +129,15 @@ void loop()
 
     switch (config.get_mode()) {
         case system_mode::hibernate: {
-            //set modem to sleep
-            communications.set_state(Communication::modem_state::off);
-            if (communications.modem_is_off()) {
-                device.set_wake_up_device(platform::wake_up_device::magnet);
-                config.set_mode(system_mode::sleep);
-                INFO("Going to deep sleep");
-                device.deep_sleep();
+            if (util::get_time_diff(mode_change_timestamp) > time_to_sleep) {
+                //set modem to sleep
+                communications.set_state(Communication::modem_state::off);
+                if (communications.modem_is_off()) {
+                    device.set_wake_up_device(platform::wake_up_device::magnet);
+                    config.set_mode(system_mode::sleep);
+                    INFO("Going to deep sleep");
+                    device.deep_sleep();
+                }
             }
             break;
         }
