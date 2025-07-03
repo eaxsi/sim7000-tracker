@@ -58,8 +58,7 @@ void setup()
 {
     Serial.begin(115200);
     WiFi.mode(WIFI_OFF);
-    while (!Serial)
-        ;
+    while (!Serial);
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2025");
 
@@ -89,6 +88,7 @@ void setup()
     );
 
     config.set_mode(system_mode::sleep);
+    ui.set_state(Ui::state::single_blink);
 
     if (bootcount != 0) {
         INFO("Woken up from deep sleep");
