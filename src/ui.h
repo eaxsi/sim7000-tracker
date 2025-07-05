@@ -15,10 +15,11 @@ class Ui
 
         Ui(platform* platform);
         void set_state(state);
+        void set_notification();
         void Ui_task();
-
 
     private:
         state m_state;
         platform *m_platform;
+        bool m_notification_activated;
 };

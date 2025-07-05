@@ -46,12 +46,38 @@ static uint32_t setting_request_interval = 5 * 60 * 1000;
 
 uint32_t last_status_timestamp = -status_interval;
 uint32_t last_setting_request_timestamp = -setting_request_interval; // request settings at every bootup
+TaskHandle_t uiTaskHandle = NULL;
 
 bool periodic_position_sent = false;
 
 void callback_helper(char* topic, byte* payload, unsigned int len)
 {
     communications.mqtt_callback(topic, payload, len);
+}
+
+void UiTask(void * parameter) {
+    ui.Ui_task();
+}
+
+void startUiTask()
+{
+    xTaskCreate(
+        UiTask,       // Task function
+        "Ui Task",    // Name of the task (for debugging)
+        1000,            // Stack size (in words, not bytes)
+        NULL,            // Task input parameter
+        2,               // Priority of the task
+        &uiTaskHandle     // Task handle
+    );
+}
+
+void restartUiTask()
+{
+    if (uiTaskHandle != NULL) {
+        vTaskDelete(uiTaskHandle);
+        uiTaskHandle = NULL;
+    }
+    startUiTask();
 }
 
 void setup()
@@ -78,14 +104,7 @@ void setup()
         strcpy(ota_wifi_details.wifi_passwd, "");
         device.restart();
     }
-    xTaskCreate(
-        UiTask,       // Task function
-        "Ui Task",    // Name of the task (for debugging)
-        1000,            // Stack size (in words, not bytes)
-        NULL,            // Task input parameter
-        2,               // Priority of the task
-        NULL             // Task handle
-    );
+    startUiTask();
 
     config.set_mode(system_mode::sleep);
     ui.set_state(Ui::state::single_blink);
@@ -100,10 +119,6 @@ void setup()
     mode_change_timestamp = millis();
 }
 
-void UiTask(void * parameter) {
-    ui.Ui_task();
-}
-
 void loop()
 {
     // event state machine
@@ -111,7 +126,13 @@ void loop()
 
     switch (event) {
         case platform::event::charger_plugged: break;
-        case platform::event::magnet: INFO("Magnet detected"); break;
+        case platform::event::magnet:
+        {
+            INFO("Magnet detected");
+            ui.set_notification();
+            restartUiTask();
+            break;
+        }
         case platform::event::movement: {
             last_movement_timestamp = millis();
             INFO("Movement detected");

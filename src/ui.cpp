@@ -11,10 +11,39 @@ void Ui::set_state(state new_state)
     m_state = new_state;
 }
 
+void Ui::set_notification()
+{
+    m_notification_activated = true;
+}
+
 void Ui::Ui_task()
 {
     while(true)
     {
+        if(m_notification_activated)
+        {
+            m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_on_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_on_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_on_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_on_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            
+            m_notification_activated = false;
+        }
+
         switch (m_state)
         {
         case state::off:
