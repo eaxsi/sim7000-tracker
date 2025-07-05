@@ -22,8 +22,6 @@ void Ui::Ui_task()
     {
         if(m_notification_activated)
         {
-            m_platform->turn_off_led();
-            vTaskDelay(50 / portTICK_PERIOD_MS);
             m_platform->turn_on_led();
             vTaskDelay(50 / portTICK_PERIOD_MS);
             m_platform->turn_off_led();
@@ -39,6 +37,8 @@ void Ui::Ui_task()
             m_platform->turn_on_led();
             vTaskDelay(50 / portTICK_PERIOD_MS);
             m_platform->turn_off_led();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+            m_platform->turn_on_led();
             vTaskDelay(50 / portTICK_PERIOD_MS);
             
             m_notification_activated = false;
@@ -58,27 +58,27 @@ void Ui::Ui_task()
         
         case state::half_blink:
             m_platform->turn_on_led();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
             m_platform->turn_off_led();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
             break;
         
         case state::single_blink:
-            m_platform->turn_off_led();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
             m_platform->turn_on_led();
             vTaskDelay(200 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
             break;
         
         case state::two_blinks:
-            m_platform->turn_off_led();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
             m_platform->turn_on_led();
             vTaskDelay(200 / portTICK_PERIOD_MS);
             m_platform->turn_off_led();
             vTaskDelay(200 / portTICK_PERIOD_MS);
             m_platform->turn_on_led();
             vTaskDelay(200 / portTICK_PERIOD_MS);
+            m_platform->turn_off_led();
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
             break;
         
         default:
