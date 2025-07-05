@@ -235,9 +235,14 @@ bool Communication::send_location(location_update* l)
     }
 }
 
-bool Communication::send_status(uint8_t soc, bool charging)
+bool Communication::send_status(uint8_t soc_in, bool charging)
 {
     if (connected_to_mqtt_broker()) {
+        int soc = soc_in;
+        if(soc_in == 255)
+        {
+            soc = -1;
+        }
         char str[80];
         sprintf(str, "%d,%d,%d", soc, get_signal_strength(), charging);
         updateValue(STATUS_TOPIC, str);
