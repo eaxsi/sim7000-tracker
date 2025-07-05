@@ -19,8 +19,6 @@ platform::event platform::get_event()
         return event::movement;
     } else if (m_reed_sensor.onRisingEdge()) {
         m_sensor_hold_timestamp = millis();
-        m_led.turn_on();
-
         while (m_reed_sensor.get_state() == false && !m_vibration_sensor.onChange()) // while reed sensor is activated
         {
             m_reed_sensor.update();
@@ -35,7 +33,6 @@ platform::event platform::get_event()
                 return event::long_magnet_hold;
             }
         }
-        m_led.turn_off();
         return event::magnet;
     } else if (!m_pinstates.charger && m_pinstates.charger != m_oldpinstates.charger) {
         return event::charger_plugged;
@@ -53,6 +50,7 @@ void platform::set_wake_up_device(platform::wake_up_device wake_up_device)
             rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off during sleep
             rtc_gpio_pullup_en((gpio_num_t)REED_PIN);
             esp_sleep_enable_ext0_wakeup((gpio_num_t)REED_PIN, 0);
+            //esp_sleep_enable_ext1_wakeup((gpio_num_t)V_BATT_PIN, ESP_EXT1_WAKEUP_ALL_LOW);
             break;
         case wake_up_device::movement: // light sleep
             rtc_gpio_pullup_en((gpio_num_t)LED_PIN); // Turn LED off during sleep
