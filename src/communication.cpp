@@ -278,6 +278,7 @@ void Communication::update()
     if (util::get_time_diff(m_status_check_timestamp) > 30 * 1000
         || m_modem_state != m_requested_modem_state) {
         INFO("Net check!");
+        m_last_modem_state = m_modem_state;
         // diagnose
         if (m_mqtt.connected())
             m_modem_state = modem_state::mqtt_connected;
@@ -289,6 +290,11 @@ void Communication::update()
             m_modem_state = modem_state::registered_to_network;
         else if (m_modem->testAT(300))
             m_modem_state = modem_state::not_registered_to_network;
+        
+        if(m_modem_state != m_last_modem_state)
+        {
+            m_mode_change_timestamp = millis();
+        }
 
         INFO_VALUE("Modem state: ", m_modem_state);
         INFO_VALUE("Target state: ", m_requested_modem_state);
@@ -305,15 +311,11 @@ void Communication::update()
                 }
             }
         } else if (m_modem_state == modem_state::not_registered_to_network) {
-            /*
-            //if stays in not reqistered state, raise error
-            if(millis() > 90000 && !m_device_has_initialized) // if no network registeration for 1,5 min
-                {
-                ERROR("Network registeration failed!");
-                m_error = 3;
+            if(util::get_time_diff(m_mode_change_timestamp) > 120*1000) // 2 min
+            {
+                ERROR("Network registeration failed, rebooting modem!");
+                reset_modem();
             }
-            else 
-            */
             if (m_requested_modem_state == modem_state::off) {
                 INFO("Turning modem off");
                 turn_modem_off();

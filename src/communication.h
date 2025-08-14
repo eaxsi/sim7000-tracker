@@ -60,6 +60,7 @@ class Communication
         uint8_t get_signal_strength();
 
         modem_state m_modem_state;
+        modem_state m_last_modem_state;
         modem_state m_requested_modem_state;
 
         //Settings& m_config;
@@ -70,6 +71,7 @@ class Communication
         char m_nodeId[8] = "";
 
         uint32_t m_status_check_timestamp = 0;
+        uint32_t m_mode_change_timestamp = 0;
         wifi_details m_wifi_details;
         bool m_first_connection = true;
         uint8_t m_modem_failed_turn_on_counter = 0;
