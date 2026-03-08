@@ -129,12 +129,13 @@ bool Communication::connect_mqtt()
 
     get_topic_name(topic_buf, CONNECTED_TOPIC);
     bool status = m_mqtt.connect(m_nodeId, BROKER_USER, BROKER_PASSWD, topic_buf, 1, true, "0");
-    if (status) {
-        INFO("MQTT Connect Success");
-    } else {
+    if (!status) {
         ERROR("MQTT Connect fail");
         ERROR(m_mqtt.state());
+        return false;
     }
+
+    INFO("MQTT Connect Success");
     m_mqtt.publish(topic_buf, "1", true);
 
     // subscribe to topics
@@ -147,8 +148,6 @@ bool Communication::connect_mqtt()
     get_topic_name(topic_buf, OTA_SUBSCRIBE_TOPIC);
     m_mqtt.subscribe(topic_buf);
 
-    // send status messages
-    //send_status();
     if (m_first_connection) {
         get_topic_name(topic_buf, VERSION_TOPIC);
         m_mqtt.publish(topic_buf, VERSION);
@@ -157,12 +156,12 @@ bool Communication::connect_mqtt()
             INFO_VALUE("Ota status: ", m_ota_status);
             send_ota_status(m_ota_status);
         }
-        
+
         m_first_connection = false;
     }
 
     m_mqtt.loop();
-    return status;
+    return true;
 }
 
 void Communication::disconnect_mqtt()
