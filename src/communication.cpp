@@ -31,18 +31,29 @@ bool Communication::init(ota::status ota_status)
         delay(1000);
     }
 
+    uint8_t at_retries = 0;
     while (!m_modem->testAT(200)) {
         INFO("...");
         delay(1000);
+        if (++at_retries > 30) {
+            ERROR("Modem not responding, rebooting");
+            reset_modem();
+            at_retries = 0;
+        }
     }
 
     m_modem->init();
+    uint8_t imei_retries = 0;
     bool imei_success = false;
     while (!imei_success) {
         String imei = m_modem->getIMEI();
         if (imei.toInt() != 0 && imei.length() > 5) {
             imei_success = true;
             imei.substring(8, 15).toCharArray(m_nodeId, 8);
+        } else if (++imei_retries > 10) {
+            ERROR("Failed to get IMEI, rebooting");
+            reset_modem();
+            imei_retries = 0;
         }
     }
 
