@@ -84,7 +84,6 @@ void setup()
 {
     Serial.begin(115200);
     WiFi.mode(WIFI_OFF);
-    while (!Serial);
     delay(1000);
     INFO("SIM7000-tracker, Eero Silfverberg, 2025");
 
