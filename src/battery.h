@@ -17,13 +17,13 @@ class Battery
     private:
         float get_raw_voltage_from_pin(uint8_t pin);
         uint8_t m_battery_pin;
-        float m_battery_voltage;
-        uint32_t m_voltage_measurement_timemstamp;
+        float m_battery_voltage = 0.0f;
+        uint32_t m_voltage_measurement_timemstamp = 0;
         uint32_t m_voltage_measurement_interval = 1000; //ms
-        uint8_t m_soc;
-        bool m_charging;
-        bool m_last_charging_state;
-        uint8_t m_charing_start_soc;
-        uint32_t m_charging_start_time;
-        bool m_has_measured_battery_voltage;
+        uint8_t m_soc = 0;
+        bool m_charging = false;
+        bool m_last_charging_state = false;
+        uint8_t m_charing_start_soc = 0;
+        uint32_t m_charging_start_time = 0;
+        bool m_has_measured_battery_voltage = false;
 };
