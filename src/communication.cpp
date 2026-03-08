@@ -215,13 +215,15 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             m_config->set_periodic_tracking_interval(received_periocid_tracking_interval);
             INFO("Changing device mode");
         } else if (i == 2 && strcmp(pt, "ota") == 0) {
-            char wifi_ssid[50] = "";
-            char wifi_passwd[50] = "";
             String s = String(payload_str);
             int sep_index = s.indexOf(":");
-            s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 40);
-            s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 40);
-            m_config->set_mode(system_mode::ota);
+            if (sep_index == -1) {
+                ERROR("Invalid OTA payload, missing ':'");
+            } else {
+                s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 40);
+                s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 40);
+                m_config->set_mode(system_mode::ota);
+            }
         }
         pt = strtok(NULL, "/");
         i++;
