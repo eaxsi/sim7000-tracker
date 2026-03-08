@@ -23,7 +23,7 @@ class Battery
         uint8_t m_soc = 0;
         bool m_charging = false;
         bool m_last_charging_state = false;
-        uint8_t m_charing_start_soc = 0;
+        uint8_t m_charging_start_soc = 0;
         uint32_t m_charging_start_time = 0;
         bool m_has_measured_battery_voltage = false;
 };

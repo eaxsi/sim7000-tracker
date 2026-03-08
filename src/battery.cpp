@@ -44,13 +44,13 @@ void Battery::update()
         if(m_charging) {
             if (!m_last_charging_state) // started charging
             {
-                m_charing_start_soc = m_soc;
+                m_charging_start_soc = m_soc;
                 m_charging_start_time = millis();
             } else
             {
                 float hours_since_charging_started
                     = (millis() - m_charging_start_time) / 3600000.0f;
-                    raw_soc = m_charing_start_soc
+                    raw_soc = m_charging_start_soc
                     + (100 * (hours_since_charging_started * CHARGING_CURRENT)
                     / BATTERY_CAPACITY);
             }
