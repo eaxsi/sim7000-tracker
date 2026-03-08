@@ -15,9 +15,7 @@ void Led::turn_off()
 void Led::set(bool state)
 {
     m_state = state;
-    if (m_reverse_logic)
-        m_state = !m_state;
-    digitalWrite(m_pin, state);
+    digitalWrite(m_pin, m_reverse_logic ? !state : state);
 }
 
 bool Led::get()
