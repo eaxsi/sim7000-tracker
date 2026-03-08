@@ -34,9 +34,9 @@ platform::event platform::get_event()
             }
         }
         return event::magnet;
-    } else if (!m_pinstates.charger && m_pinstates.charger != m_oldpinstates.charger) {
-        return event::charger_plugged;
     } else if (m_pinstates.charger && m_pinstates.charger != m_oldpinstates.charger) {
+        return event::charger_plugged;
+    } else if (!m_pinstates.charger && m_pinstates.charger != m_oldpinstates.charger) {
         return event::charger_unplugged;
     } else {
         return event::none;
