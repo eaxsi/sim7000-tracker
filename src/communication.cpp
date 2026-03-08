@@ -155,7 +155,6 @@ bool Communication::connect_mqtt()
         if(m_ota_status != ota::status::none)
         {
             INFO_VALUE("Ota status: ", m_ota_status);
-            Serial.println(m_ota_status);
             send_ota_status(m_ota_status);
         }
         
