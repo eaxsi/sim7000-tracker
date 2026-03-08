@@ -377,7 +377,7 @@ bool Communication::updateValue(char* topic_name, char* value_buffer)
 
 bool Communication::get_ota_wifi_details(wifi_details* ota_wifi)
 {
-    if (m_wifi_details.wifi_ssid != "" && m_wifi_details.wifi_passwd != "") {
+    if (strlen(m_wifi_details.wifi_ssid) > 0 && strlen(m_wifi_details.wifi_passwd) > 0) {
         strcpy(ota_wifi->wifi_ssid, m_wifi_details.wifi_ssid);
         strcpy(ota_wifi->wifi_passwd, m_wifi_details.wifi_passwd);
         return true;
