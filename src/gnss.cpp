@@ -152,13 +152,13 @@ void Gnss::update()
                 // turn off
                 turn_off_impl();
                 m_state = state::off;
-            }
-
-            bool non_valid_data = m_loc.vsat > 10000 && m_loc.usat == 0;
-            if (non_valid_data || m_device_stuck) {
-                turn_off_impl();
-                turn_on_impl();
-                m_state = state::no_fix;
+            } else {
+                bool non_valid_data = m_loc.vsat > 10000 && m_loc.usat == 0;
+                if (non_valid_data || m_device_stuck) {
+                    turn_off_impl();
+                    turn_on_impl();
+                    m_state = state::no_fix;
+                }
             }
             break;
         }
