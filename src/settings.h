@@ -19,6 +19,6 @@ class Settings
 
     private:
         //char m_nodeId[8] = "";
-        static inline system_mode m_mode = system_mode::sleep;
+        system_mode m_mode = system_mode::sleep;
         uint32_t m_periodic_tracking_interval = 0;
 };
