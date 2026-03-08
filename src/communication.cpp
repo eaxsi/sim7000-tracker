@@ -172,6 +172,11 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
     Serial.println();
 
     // parse topic and update device shadow
+    char payload_str[128];
+    uint32_t copy_len = len < sizeof(payload_str) - 1 ? len : sizeof(payload_str) - 1;
+    memcpy(payload_str, payload, copy_len);
+    payload_str[copy_len] = '\0';
+
     char* pt;
     uint8_t i = 0;
     pt = strtok(topic, "/");
@@ -179,8 +184,7 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
         if (i == 0 && strcmp(pt, PROJECT_NAME) != 0)
             return;
         else if (i == 2 && strcmp(pt, "settings") == 0) {
-            payload[len] = '\0';
-            String message = String((char*)payload);
+            String message = String(payload_str);
 
             // Find the index of the first comma
             int commaIndex = message.indexOf(',');
@@ -200,10 +204,9 @@ void Communication::mqtt_callback(char* topic, byte* payload, unsigned int len)
             m_config->set_periodic_tracking_interval(received_periocid_tracking_interval);
             INFO("Changing device mode");
         } else if (i == 2 && strcmp(pt, "ota") == 0) {
-            payload[len] = '\0';
             char wifi_ssid[50] = "";
             char wifi_passwd[50] = "";
-            String s = String((char*)payload);
+            String s = String(payload_str);
             int sep_index = s.indexOf(":");
             s.substring(0, sep_index).toCharArray(m_wifi_details.wifi_ssid, 40);
             s.substring(sep_index + 1).toCharArray(m_wifi_details.wifi_passwd, 40);
