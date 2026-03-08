@@ -18,7 +18,7 @@ class Battery
         float get_raw_voltage_from_pin(uint8_t pin);
         uint8_t m_battery_pin;
         float m_battery_voltage = 0.0f;
-        uint32_t m_voltage_measurement_timemstamp = 0;
+        uint32_t m_voltage_measurement_timestamp = 0;
         uint32_t m_voltage_measurement_interval = 1000; //ms
         uint8_t m_soc = 0;
         bool m_charging = false;

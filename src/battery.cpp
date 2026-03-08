@@ -37,7 +37,7 @@ float Battery::get_raw_voltage_from_pin(uint8_t pin)
 
 void Battery::update()
 {
-    if (util::get_time_diff(m_voltage_measurement_timemstamp) > m_voltage_measurement_interval) {
+    if (util::get_time_diff(m_voltage_measurement_timestamp) > m_voltage_measurement_interval) {
         float raw_voltage = get_raw_voltage_from_pin(m_battery_pin);
         int raw_soc = m_soc;
         m_charging = raw_voltage < 2000;
@@ -72,6 +72,6 @@ void Battery::update()
 
         m_soc = (uint8_t)constrain(raw_soc, 0, 100);
         m_last_charging_state = m_charging;
-        m_voltage_measurement_timemstamp = millis();
+        m_voltage_measurement_timestamp = millis();
     }
 }
