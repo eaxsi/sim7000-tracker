@@ -4,6 +4,7 @@ Ui::Ui(platform * platform)
 {
     m_platform = platform;
     m_state = state::off;
+    m_notification_activated = false;
 }
 
 void Ui::set_state(state new_state)
