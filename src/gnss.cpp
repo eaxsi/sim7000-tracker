@@ -3,6 +3,8 @@
 Gnss::Gnss(TinyGsm* m)
 {
     m_modem = m;
+    m_state = state::off;
+    m_requested_state = state::off;
 }
 
 void Gnss::turn_on()
