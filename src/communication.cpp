@@ -233,7 +233,7 @@ bool Communication::send_location(location_update* l)
     if (connected_to_mqtt_broker()) {
         char str[80];
         sprintf(str,
-                "%f,%f,%f,%f,%f,%d,%d,%d",
+                "%.6f,%.6f,%.1f,%.1f,%.1f,%d,%d,%d",
                 l->lat,
                 l->lon,
                 l->speed,
